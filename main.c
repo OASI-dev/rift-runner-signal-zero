@@ -225,7 +225,7 @@ static void FirstAudioGesture(void)
             g.sounds[SFX_ENEMY_DOWN] = LoadSound("assets/enemy_down.wav");
             g.sounds[SFX_SURGE] = LoadSound("assets/surge.wav");
             g.ambient = LoadMusicStream("assets/ambient_loop.wav");
-            g.musicLoaded = IsMusicReady(g.ambient);
+            g.musicLoaded = IsMusicValid(g.ambient);
             if (g.musicLoaded) SetMusicVolume(g.ambient, g.muted ? 0.0f : 0.22f);
         }
     }
@@ -235,7 +235,7 @@ static void FirstAudioGesture(void)
 
 static void PlaySfx(SoundId id)
 {
-    if (!g.muted && g.audioReady && id >= 0 && id < SFX_COUNT && IsSoundReady(g.sounds[id])) PlaySound(g.sounds[id]);
+    if (!g.muted && g.audioReady && id >= 0 && id < SFX_COUNT && IsSoundValid(g.sounds[id])) PlaySound(g.sounds[id]);
 }
 
 static void ToggleMute(void)
@@ -286,7 +286,7 @@ static void SaveScores(void)
                 if (error) console.warn('RIFT RUNNER: could not persist personal scores', error);
             });
         }
-    });
+    }, 0);
 #endif
 }
 
@@ -1258,7 +1258,7 @@ static void ShutdownGame(void)
     SaveScores();
     if (g.audioReady) {
         if (g.musicLoaded) { StopMusicStream(g.ambient); UnloadMusicStream(g.ambient); }
-        for (int i = 0; i < SFX_COUNT; ++i) if (IsSoundReady(g.sounds[i])) UnloadSound(g.sounds[i]);
+        for (int i = 0; i < SFX_COUNT; ++i) if (IsSoundValid(g.sounds[i])) UnloadSound(g.sounds[i]);
         CloseAudioDevice();
     }
     free(g.scores);
