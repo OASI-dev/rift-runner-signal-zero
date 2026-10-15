@@ -1,5 +1,12 @@
 # Building RIFT RUNNER: SIGNAL ZERO
 
+## Browser version (players need no development tools)
+
+The repository includes `.github/workflows/deploy-web.yml`. On every push to `main`, GitHub Actions uses Emscripten to compile the C project to WebAssembly and deploys the site to GitHub Pages. To enable the first deployment, open the repository's Settings → Pages and set the source to **GitHub Actions**. After the workflow succeeds, the intended URL is `https://oasi-dev.github.io/rift-runner-signal-zero/`.
+
+The browser target uses the Emscripten main loop and preloads the game's `assets/` directory. The current web build is designed for keyboard input; touch controls and persistent browser storage are not included yet. Check the Actions log and test the live game before sharing the link as ready.
+
+
 This is the single merged repository for all 15 installments. The source ZIP does not contain a prebuilt game binary.
 
 ## Requirements

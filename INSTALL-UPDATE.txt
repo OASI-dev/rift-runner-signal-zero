@@ -1,0 +1,20 @@
+RIFT RUNNER: SIGNAL ZERO — Browser Deployment Update v0.15.2
+
+This is an overlay patch for the existing rift-runner-signal-zero repository.
+It does not contain a prebuilt game. GitHub Actions compiles the browser game
+from C source and deploys it to GitHub Pages.
+
+Apply it by copying the CONTENTS of this folder into the root of your existing
+local repository and allowing the listed files to be replaced. Merge the
+folders src, .github/workflows, and web. Do not copy this folder itself as a
+new subfolder inside the repository.
+
+Then use GitHub Desktop to commit and push the changes to the main branch.
+On GitHub, open Settings > Pages > Build and deployment and select GitHub Actions
+as the Source. Open Actions and check the "Build and publish browser game"
+workflow. The site is ready to share only when the workflow finishes successfully
+and you test the live page.
+
+Intended site URL: https://oasi-dev.github.io/rift-runner-signal-zero/
+The first workflow run has not been verified yet. The browser build is currently
+keyboard-oriented; touch controls and persistent browser saves are not implemented.

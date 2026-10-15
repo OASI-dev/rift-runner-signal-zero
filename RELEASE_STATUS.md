@@ -1,10 +1,17 @@
-# RIFT RUNNER: SIGNAL ZERO — Release Status (0.15.1)
+# RIFT RUNNER: SIGNAL ZERO — Release Status (0.15.2)
 
 ## Current status
 
 This archive is the consolidated source release candidate (all 15 installments merged into one repository). It includes the C99 game source, generated WAV assets, profile/game-state regression tests, build scripts, and project documentation.
 
 **It is not a verified playable binary release yet.** The current build environment could not resolve `github.com`, so the pinned raylib 6.0 source archive could not be downloaded. The application target has previously been compiled and linked with strict warnings against a local test-only raylib stub. A final source audit also hardened oversized integer parsing in corrupt profile files and sanitized frame-time values in the renderer. That checks project/CMake wiring, but does not verify a real graphics context, real audio device, or live gameplay.
+
+## Browser deployment setup (not yet live-verified)
+
+- Added the Emscripten browser event loop, web CMake linker options, asset preloading, and a responsive GitHub Pages launcher page.
+- Added `.github/workflows/deploy-web.yml` to compile to WebAssembly in GitHub Actions and publish the static site.
+- The workflow has not run from this environment; a successful GitHub Actions run and in-browser playtest are still required before sharing the public play link as working.
+- The current browser shell is intended for keyboard play; touch controls and browser-persistent save storage have not been implemented.
 
 ## Verified in this environment
 

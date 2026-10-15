@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080914">
+  <meta name="description" content="Play RIFT RUNNER: SIGNAL ZERO in your browser. A neon-cosmic survival arcade game.">
+  <title>RIFT RUNNER: SIGNAL ZERO — Play</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; background: #080914; color: #f4f7ff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 50% -20%, #25245b 0%, #0c1028 45%, #080914 78%); }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 12px clamp(14px, 3vw, 32px); border-bottom: 1px solid rgba(137, 155, 255, .22); }
+    .brand { font-size: clamp(16px, 2.4vw, 22px); font-weight: 850; letter-spacing: .11em; }
+    .signal { color: #59e5ff; }
+    .status { font-size: 12px; color: #aeb9d7; letter-spacing: .13em; text-transform: uppercase; }
+    main { width: min(1440px, 100%); margin: 0 auto; padding: 12px clamp(8px, 2vw, 24px) 18px; }
+    .intro { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; padding: 2px 2px 10px; }
+    h1 { margin: 0; font-size: clamp(12px, 1.35vw, 16px); color: #cdd4ff; font-weight: 600; }
+    .hint { margin: 0; color: #9ca9ce; font-size: 12px; }
+    .game-wrap { overflow: hidden; border: 1px solid rgba(109, 235, 255, .45); border-radius: 14px; background: #03040b; box-shadow: 0 0 32px rgba(41, 121, 255, .14), 0 0 70px rgba(119, 42, 255, .08); height: min(78svh, 850px); min-height: 380px; }
+    iframe { display: block; width: 100%; height: 100%; border: 0; background: #050612; }
+    .controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 16px; padding: 11px 0 0; color: #b7c2e2; font-size: 12px; }
+    kbd { display: inline-block; border: 1px solid #414d77; border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; margin: 0 2px; color: #f2f4ff; background: #151b36; font: inherit; }
+    footer { color: #677394; text-align: center; padding: 6px 12px 15px; font-size: 11px; }
+    footer a { color: #8ca8ff; }
+    @media (max-width: 600px) { header { align-items: flex-start; flex-direction: column; gap: 4px; } .game-wrap { height: 68svh; min-height: 340px; } .controls { justify-content: flex-start; line-height: 1.8; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">RIFT RUNNER <span class="signal">: SIGNAL ZERO</span></div>
+    <div class="status">Browser edition · Free to play</div>
+  </header>
+  <main>
+    <div class="intro">
+      <h1>Enter the rift. Survive the surge.</h1>
+      <p class="hint">Click inside the game, then press Enter to start.</p>
+    </div>
+    <section class="game-wrap" aria-label="RIFT RUNNER game window">
+      <iframe src="game.html" title="RIFT RUNNER: SIGNAL ZERO game" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+    </section>
+    <div class="controls" aria-label="Keyboard controls">
+      <span><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> Move</span>
+      <span><kbd>Space</kbd> / <kbd>Shift</kbd> Dash</span>
+      <span><kbd>P</kbd> Pause</span>
+      <span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Upgrade</span>
+      <span><kbd>S</kbd> Settings</span>
+      <span><kbd>F</kbd> Fullscreen</span>
+    </div>
+  </main>
+  <footer>Made with C and raylib · <a href="https://github.com/OASI-dev/rift-runner-signal-zero">View the source on GitHub</a> · Use a keyboard for the best experience.</footer>
+</body>
+</html>

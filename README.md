@@ -28,6 +28,16 @@ A neon-cosmic survival arcade game written in C99 using raylib 6.0. This reposit
 - **S (title screen):** Settings
 - **Settings:** Up/Down select; Left/Right adjust volumes or toggle options; Enter toggles/confirms; Esc returns to title
 
+## Play in a browser
+
+The repository includes a GitHub Actions workflow that builds the game for browsers using Emscripten and publishes the generated site with GitHub Pages. After this workflow has been committed and its first run succeeds, enable **Settings → Pages → Build and deployment → Source: GitHub Actions**. The public play page will be:
+
+`https://oasi-dev.github.io/rift-runner-signal-zero/`
+
+The web build is compiled in GitHub Actions, so players do not need Visual Studio, CMake, a compiler, or a download. Click inside the game frame and use the keyboard controls below. The web build currently targets keyboard play; touch controls and browser-persistent save data have not yet been implemented. The web build and live gameplay still need to pass the hosted workflow before the link can be advertised as ready.
+
+To build the browser version yourself, use an Emscripten SDK and run `emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release -DRR_BUILD_TESTS=OFF -DPLATFORM=Web`, then `cmake --build build-web`. The Pages workflow performs these steps automatically.
+
 ## Build the game
 
 Requirements: CMake 3.24+, a C99-capable compiler, desktop development libraries required by raylib, and internet access on first configure (unless using installed/local raylib).

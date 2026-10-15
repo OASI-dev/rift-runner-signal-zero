@@ -63,3 +63,11 @@
 
 ## Parts 01–07
 - See README.md for the feature history from the raylib foundation through persistent progression, visual effects, audio, and settings.
+
+
+## 0.15.2 — Browser deployment setup
+
+- Added an Emscripten-compatible browser main loop for the C/raylib game.
+- Added a GitHub Actions workflow to compile WebAssembly and deploy a browser page to GitHub Pages.
+- Added a responsive launch page with keyboard controls.
+- This is deployment scaffolding pending a successful hosted build and real browser playtest; mobile touch controls and browser-persistent saves are not included.

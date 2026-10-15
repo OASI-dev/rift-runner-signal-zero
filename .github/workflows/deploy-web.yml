@@ -1,0 +1,68 @@
+name: Build and publish browser game
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    name: Compile web game
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Emscripten
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 3.1.64
+
+      - name: Configure WebAssembly build
+        run: emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release -DRR_BUILD_TESTS=OFF -DPLATFORM=Web
+
+      - name: Compile the game
+        run: cmake --build build-web --parallel 2
+
+      - name: Assemble GitHub Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          test -f build-web/bin/rift_runner.html
+          test -f build-web/bin/rift_runner.js
+          test -f build-web/bin/rift_runner.wasm
+          test -f build-web/bin/rift_runner.data
+          cp web/index.html dist/index.html
+          cp build-web/bin/rift_runner.html dist/game.html
+          cp build-web/bin/rift_runner.js build-web/bin/rift_runner.wasm build-web/bin/rift_runner.data dist/
+          cp LICENSE dist/LICENSE.txt
+          printf 'Build commit: %s\n' "$GITHUB_SHA" > dist/BUILD_INFO.txt
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: Publish public play link
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-web
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

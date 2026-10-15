@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(rift_runner_signal_zero VERSION 0.15.1 LANGUAGES C)
+project(rift_runner_signal_zero VERSION 0.15.2 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -11,6 +11,11 @@ option(RR_TESTS_ONLY "Configure only offline/headless tests (does not fetch rayl
 option(RR_USE_SYSTEM_RAYLIB "Use an installed raylib CMake package instead of fetching raylib" OFF)
 option(RR_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer (GCC/Clang)" OFF)
 set(RR_RAYLIB_SOURCE_DIR "" CACHE PATH "Optional local raylib source tree; skips the download when set")
+
+# Tell raylib to build its HTML5 backend whenever the game is compiled with Emscripten.
+if(EMSCRIPTEN)
+    set(PLATFORM Web CACHE STRING "raylib target platform" FORCE)
+endif()
 
 if(RR_ENABLE_SANITIZERS AND NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     message(FATAL_ERROR "RR_ENABLE_SANITIZERS requires GCC or Clang; disable it for this compiler.")
@@ -109,8 +114,7 @@ if(NOT RR_TESTS_ONLY)
         target_link_libraries(rift_runner PRIVATE "-framework IOKit" "-framework Cocoa" "-framework OpenGL")
     endif()
 
-    # Keep the executable in the same directory with single- and multi-config
-    # generators (e.g. Make/Ninja and Visual Studio/Xcode).
+    # Keep the executable in the same directory with single- and multi-config generators (e.g. Make/Ninja and Visual Studio/Xcode).
     set_target_properties(rift_runner PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
@@ -120,11 +124,27 @@ if(NOT RR_TESTS_ONLY)
         )
     endforeach()
 
-    add_custom_command(TARGET rift_runner POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:rift_runner>/assets"
-        VERBATIM
-    )
+    if(EMSCRIPTEN)
+        target_compile_definitions(rift_runner PRIVATE PLATFORM_WEB)
+        target_link_options(rift_runner PRIVATE
+            "-sUSE_GLFW=3"
+            "-sASYNCIFY=1"
+            "-sALLOW_MEMORY_GROWTH=1"
+            "-sFORCE_FILESYSTEM=1"
+            "-sASSERTIONS=1"
+            "-sGL_ENABLE_GET_PROC_ADDRESS=1"
+            "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
+        )
+        # Emscripten emits the HTML launcher plus sibling JS/WASM/data files.
+        set_target_properties(rift_runner PROPERTIES SUFFIX ".html")
+    else()
+        add_custom_command(TARGET rift_runner POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:rift_runner>/assets"
+            VERBATIM
+        )
+    endif()
+
 else()
     message(STATUS "RR_TESTS_ONLY=ON: skipping the game executable and raylib dependency")
 endif()
