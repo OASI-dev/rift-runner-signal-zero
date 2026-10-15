@@ -3,7 +3,14 @@ project(rift_runner_signal_zero VERSION 0.15.2 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+# raylib's Web backend uses Emscripten inline assembly in headers. Emscripten
+# requires GNU C mode for this, rather than strict -std=c99 mode. Keep native
+# builds strict, but let the browser build use -std=gnu99.
+if(EMSCRIPTEN)
+    set(CMAKE_C_EXTENSIONS ON)
+else()
+    set(CMAKE_C_EXTENSIONS OFF)
+endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(RR_BUILD_TESTS "Build RIFT RUNNER regression tests" ON)
@@ -83,6 +90,16 @@ if(NOT RR_TESTS_ONLY)
         )
         FetchContent_MakeAvailable(raylib)
         set(RR_RAYLIB_TARGET raylib)
+        # Set this after raylib is created as its CMake file may set strict C
+        # extensions itself. CMake then emits -std=gnu99 for Emscripten's
+        # raylib sources, avoiding EM_ASM errors in strict -std=c* mode.
+        if(EMSCRIPTEN AND TARGET raylib)
+            # Some raylib revisions add an explicit -std=c99 option, which
+            # overrides C_EXTENSIONS. Add GNU C mode as a target option so it
+            # is passed after directory/compiler flags for raylib itself.
+            set_property(TARGET raylib PROPERTY C_EXTENSIONS ON)
+            target_compile_options(raylib PRIVATE "$<$<COMPILE_LANGUAGE:C>:-std=gnu99>")
+        endif()
         if(RR_RAYLIB_SOURCE_DIR)
             message(STATUS "Using local raylib source tree: ${RR_RAYLIB_SOURCE_DIR}")
         else()
@@ -99,6 +116,9 @@ if(NOT RR_TESTS_ONLY)
     )
     target_include_directories(rift_runner PRIVATE src)
     target_link_libraries(rift_runner PRIVATE ${RR_RAYLIB_TARGET})
+    if(EMSCRIPTEN)
+        set_property(TARGET rift_runner PROPERTY C_EXTENSIONS ON)
+    endif()
     rr_enable_sanitizers(rift_runner)
 
     if(MSVC)
