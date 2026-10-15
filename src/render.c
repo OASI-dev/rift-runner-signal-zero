@@ -116,7 +116,7 @@ static void DrawGradientBackdrop(void)
         float y = height * (0.19f + 0.62f * (0.5f + 0.5f * sinf(f * 5.9f + rendererTime * 0.12f)));
         float radius = height * (0.17f + 0.12f * (0.5f + 0.5f * sinf(rendererTime * 0.23f + f * 4.0f)));
         Color tint = (i % 3 == 0) ? COLOR_BLUE : ((i % 3 == 1) ? COLOR_VIOLET : COLOR_MAGENTA);
-        DrawCircleGradient((int)x, (int)y, radius, WithAlpha(tint, 14.0f), WithAlpha(tint, 0.0f));
+        DrawCircleGradient((Vector2){x, y}, radius, WithAlpha(tint, 14.0f), WithAlpha(tint, 0.0f));
     }
 }
 
@@ -169,7 +169,7 @@ static void DrawCosmicRift(void)
     float rx = minDimension * 0.255f * breath;
     float ry = minDimension * 0.155f * (2.0f - breath);
 
-    DrawCircleGradient((int)center.x, (int)center.y, minDimension * 0.26f,
+    DrawCircleGradient(center, minDimension * 0.26f,
                        (Color){49, 28, 130, 36}, (Color){12, 5, 35, 0});
     DrawRiftRing(center, rx * 1.38f, ry * 1.38f, -rendererTime * 0.055f, 0.055f,
                  (Color){73, 65, 255, 39}, ARC_SEGMENTS, 2.0f);
