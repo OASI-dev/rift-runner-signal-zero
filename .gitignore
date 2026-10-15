@@ -1,0 +1,24 @@
+/build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.app/
+rift_runner_save.dat
+
+# Local player profile
+rift_runner_profile.dat
+/build-stub/
+/test-work/
+*.tmp
+
+/build-*/
+# Static-analyzer reports
+*.plist
+
+build-offline-tests/
+build-sanitized-tests/
+cmake-build-*/
+.DS_Store

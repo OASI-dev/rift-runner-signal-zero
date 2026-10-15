@@ -1,0 +1,85 @@
+name: Tagged desktop release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux-x64
+            executable_suffix: ''
+          - runner: windows-latest
+            platform: windows-x64
+            executable_suffix: '.exe'
+          - runner: macos-latest
+            platform: macos
+            executable_suffix: ''
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake pkg-config libasound2-dev \
+            libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev
+
+      - name: Configure native Release build (real raylib)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DRR_BUILD_TESTS=ON
+
+      - name: Build game and tests
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Run regression tests
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Validate bundled audio
+        run: python3 tools/check_assets.py
+
+      - name: Assemble portable folder
+        shell: bash
+        run: |
+          set -eu
+          mkdir -p dist
+          cp "build/bin/rift_runner${{ matrix.executable_suffix }}" dist/
+          cp -R build/bin/assets dist/assets
+          cp README.md BUILDING.md DIAGNOSTICS.md LICENSE dist/
+          if [ ! -f build/_deps/raylib-src/LICENSE ]; then
+            echo "raylib license file was not found in FetchContent source" >&2
+            exit 1
+          fi
+          cp build/_deps/raylib-src/LICENSE dist/RAYLIB-LICENSE.txt
+          cd dist
+          cmake -E tar cfv "../rift-runner-${{ matrix.platform }}.zip" --format=zip .
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rift-runner-${{ matrix.platform }}
+          path: rift-runner-${{ matrix.platform }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: release-assets/*.zip
