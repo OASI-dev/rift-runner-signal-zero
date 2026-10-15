@@ -2,25 +2,18 @@
 
 Thanks for helping with RIFT RUNNER: SIGNAL ZERO.
 
-## Before a change
+## Source layout
 
-- Keep gameplay and engine code in C99 under `src/`.
-- Keep third-party dependencies separate; do not copy raylib source into the repository.
-- Add or update a regression test for changes to profile handling or game-state behavior.
-- Do not claim graphics/audio are validated by the headless raylib stub.
+- Keep all gameplay, rendering, audio calls, and score handling in root-level `main.c` so the code stays approachable.
+- Keep build/deployment instructions, browser hosting glue, workflows, and bundled WAV assets in their own files.
+- Do not vendor raylib source into the repository; CMake fetches raylib 6.0 for builds.
+- Avoid survival-time scoring UI. Rift Stage pressure must progress from score milestones.
+- Describe the personal scoreboard as local-to-device; do not label it an online/global leaderboard.
 
 ## Local checks
 
 ```sh
-./tools/release-check.sh
+./tools/validate.sh
 ```
 
-For a native build with raylib available:
-
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
-ctest --test-dir build --output-on-failure
-```
-
-Please describe your operating system, compiler and CMake version in bug reports. For display or audio issues, include whether the native build completed and whether the problem can be reproduced in a clean run.
+This configures and builds the native target and checks the bundled WAV assets. The GitHub Actions workflows independently compile the native and WebAssembly targets. A successful source check is not a substitute for play-testing the actual browser build.

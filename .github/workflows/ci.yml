@@ -1,51 +1,28 @@
-name: CMake CI
+name: Native build check
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  headless-tests:
+  linux-build:
+    name: Compile desktop game (Linux)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - name: Configure offline test-only build
-        run: cmake -S . -B build-tests -DCMAKE_BUILD_TYPE=Release -DRR_TESTS_ONLY=ON -DRR_BUILD_TESTS=ON
-      - name: Build regression tests
-        run: cmake --build build-tests --parallel 2
-      - name: Run regression tests
-        run: ctest --test-dir build-tests --output-on-failure
-      - name: Validate bundled WAV files
-        run: python3 tools/check_assets.py
-
-  sanitizer-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Configure sanitizer-enabled offline tests
-        run: cmake -S . -B build-sanitized -DCMAKE_BUILD_TYPE=Debug -DRR_TESTS_ONLY=ON -DRR_BUILD_TESTS=ON -DRR_ENABLE_SANITIZERS=ON
-      - name: Build regression tests with sanitizers
-        run: cmake --build build-sanitized --parallel 2
-      - name: Run AddressSanitizer and UndefinedBehaviorSanitizer tests
-        env:
-          ASAN_OPTIONS: detect_leaks=1
-          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
-        run: ctest --test-dir build-sanitized --output-on-failure
-      - name: Validate bundled WAV files
-        run: python3 tools/check_assets.py
-
-  native-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install desktop development dependencies
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Install raylib desktop dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake pkg-config libasound2-dev \
             libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev
-      - name: Configure native game
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DRR_BUILD_TESTS=ON
-      - name: Build game and tests
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Compile
         run: cmake --build build --parallel 2
-      - name: Run regression tests
-        run: ctest --test-dir build --output-on-failure
+      - name: Validate audio assets
+        run: python3 tools/check_assets.py

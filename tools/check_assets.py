@@ -13,6 +13,7 @@ EXPECTED = (
     "impact.wav",
     "pickup.wav",
     "surge.wav",
+    "shot.wav",
 )
 
 def main() -> int:

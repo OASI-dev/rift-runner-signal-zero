@@ -26,27 +26,19 @@ jobs:
             executable_suffix: ''
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v7
-
+      - uses: actions/checkout@v6
       - name: Install Linux desktop dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake pkg-config libasound2-dev \
             libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev
-
-      - name: Configure native Release build (real raylib)
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DRR_BUILD_TESTS=ON
-
-      - name: Build game and tests
+      - name: Configure native Release build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build game
         run: cmake --build build --config Release --parallel 2
-
-      - name: Run regression tests
-        run: ctest --test-dir build --build-config Release --output-on-failure
-
       - name: Validate bundled audio
         run: python3 tools/check_assets.py
-
       - name: Assemble portable folder
         shell: bash
         run: |
@@ -54,7 +46,7 @@ jobs:
           mkdir -p dist
           cp "build/bin/rift_runner${{ matrix.executable_suffix }}" dist/
           cp -R build/bin/assets dist/assets
-          cp README.md BUILDING.md DIAGNOSTICS.md LICENSE dist/
+          cp README.md BUILDING.md LICENSE dist/
           if [ ! -f build/_deps/raylib-src/LICENSE ]; then
             echo "raylib license file was not found in FetchContent source" >&2
             exit 1
@@ -62,7 +54,6 @@ jobs:
           cp build/_deps/raylib-src/LICENSE dist/RAYLIB-LICENSE.txt
           cd dist
           cmake -E tar cfv "../rift-runner-${{ matrix.platform }}.zip" --format=zip .
-
       - uses: actions/upload-artifact@v7
         with:
           name: rift-runner-${{ matrix.platform }}

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080914">
-  <meta name="description" content="Play RIFT RUNNER: SIGNAL ZERO in your browser. A neon-cosmic survival arcade game.">
+  <meta name="description" content="Play RIFT RUNNER: SIGNAL ZERO in your browser. A score-driven neon-cosmic arcade game.">
   <title>RIFT RUNNER: SIGNAL ZERO — Play</title>
   <style>
     :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; background: #080914; color: #f4f7ff; }
@@ -34,21 +34,24 @@
   </header>
   <main>
     <div class="intro">
-      <h1>Enter the rift. Survive the surge.</h1>
-      <p class="hint">Click inside the game, then press Enter to start.</p>
+      <h1>Enter the rift. Aim, fire, and own the high score.</h1>
+      <p class="hint">Choose Easy, Medium, or Hard on the title screen. Click inside the game first to enable sound.</p>
     </div>
     <section class="game-wrap" aria-label="RIFT RUNNER game window">
       <iframe src="game.html" title="RIFT RUNNER: SIGNAL ZERO game" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
     </section>
     <div class="controls" aria-label="Keyboard controls">
-      <span><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> Move</span>
-      <span><kbd>Space</kbd> / <kbd>Shift</kbd> Dash</span>
-      <span><kbd>P</kbd> Pause</span>
-      <span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Upgrade</span>
-      <span><kbd>S</kbd> Settings</span>
-      <span><kbd>F</kbd> Fullscreen</span>
+      <span><kbd>WASD</kbd> / <kbd>←↑↓→</kbd> Move + face</span>
+      <span>Auto-fire along facing</span>
+      <span>Hold mouse button to aim</span>
+      <span><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> Choose difficulty</span>
+      <span><kbd>B</kbd> Personal score history</span>
+      <span><kbd>Space</kbd> / <kbd>Shift</kbd> Phase dash</span>
+      <span><kbd>P</kbd> / <kbd>Esc</kbd> Pause</span>
+      <span><kbd>M</kbd> Toggle sound</span>
+      <span>Touch: left side moves, right side aims</span>
     </div>
   </main>
-  <footer>Made with C and raylib · <a href="https://github.com/OASI-dev/rift-runner-signal-zero">View the source on GitHub</a> · Use a keyboard for the best experience.</footer>
+  <footer>Made with C and raylib · <a href="https://github.com/OASI-dev/rift-runner-signal-zero">View the source on GitHub</a> · Desktop keyboard/mouse is the primary experience; touch support is basic and should be tested per device.</footer>
 </body>
 </html>
