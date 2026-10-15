@@ -9,14 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if defined(__EMSCRIPTEN__)
 #include <emscripten.h>
-#define RR_SCORE_FILE "/persist/rift_runner_scores.txt"
-#define RR_SCORE_TEMP "/persist/rift_runner_scores.tmp"
+#define RR_SCORE_FILE "/persist/rift_runner_bests.txt"
 #else
-#define RR_SCORE_FILE "rift_runner_scores.txt"
-#define RR_SCORE_TEMP "rift_runner_scores.tmp"
+#define RR_SCORE_FILE "rift_runner_bests.txt"
 #endif
 
 #define RR_TITLE "RIFT RUNNER: SIGNAL ZERO"
@@ -46,11 +45,9 @@
 #define C_MUTED    ((Color){ 143, 158, 196, 255})
 #define C_RED      ((Color){ 255,  83,  99, 255})
 
-#define ARRAY_COUNT(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
 typedef enum GameState { STATE_TITLE, STATE_PLAYING, STATE_PAUSED, STATE_GAME_OVER, STATE_SCORES } GameState;
 typedef enum Difficulty { DIFF_EASY = 0, DIFF_MEDIUM = 1, DIFF_HARD = 2 } Difficulty;
-typedef enum EnemyKind { ENEMY_STALKER = 0, ENEMY_SKITTER = 1, ENEMY_BRUTE = 2 } EnemyKind;
 typedef enum PickupKind { PICKUP_DATA = 0, PICKUP_REPAIR = 1 } PickupKind;
 typedef enum SoundId { SFX_SHOT, SFX_DASH, SFX_IMPACT, SFX_PICKUP, SFX_ENEMY_DOWN, SFX_SURGE, SFX_COUNT } SoundId;
 
@@ -65,7 +62,6 @@ typedef struct Player {
     float dashTime;
     float invulnerable;
     float animation;
-    int dashUses;
 } Player;
 
 typedef struct Bullet {
@@ -79,16 +75,9 @@ typedef struct Bullet {
 
 typedef struct Enemy {
     bool active;
-    Vector2 pos;
-    Vector2 vel;
-    float radius;
-    float speed;
-    float hp;
-    float maxHp;
-    float phase;
-    float flash;
-    EnemyKind kind;
-    int scoreValue;
+    Vector2 pos, vel;
+    float radius, speed, hp, maxHp;
+    float heading, turnClock, turnRate, flash;
 } Enemy;
 
 typedef struct Particle {
@@ -121,13 +110,6 @@ typedef struct Star {
     float x, y, speed, size, phase;
 } Star;
 
-typedef struct ScoreEntry {
-    int score;
-    int difficulty;
-    int stage;
-    int kills;
-} ScoreEntry;
-
 typedef struct DifficultyInfo {
     const char *name;
     const char *tagline;
@@ -156,17 +138,12 @@ typedef struct Game {
     Pickup pickups[MAX_PICKUPS];
     Floater floaters[MAX_FLOATERS];
     Star stars[MAX_STARS];
-    ScoreEntry *scores;
-    int scoreCount;
-    int scoreCapacity;
+    int bestScores[3];
     int score;
     int kills;
     int stage;
     int combo;
-    int scoreScroll;
-    int bestBeforeRun;
     bool newPersonalBest;
-    bool muted;
     bool audioReady;
     bool musicLoaded;
     bool firstAudioGesture;
@@ -177,8 +154,6 @@ typedef struct Game {
     float flashAlpha;
     float stageNotice;
     float comboClock;
-    float menuPulse;
-    float touchHintClock;
     int menuSelection;
     Music ambient;
     Sound sounds[SFX_COUNT];
@@ -226,7 +201,7 @@ static void FirstAudioGesture(void)
             g.sounds[SFX_SURGE] = LoadSound("assets/surge.wav");
             g.ambient = LoadMusicStream("assets/ambient_loop.wav");
             g.musicLoaded = IsMusicValid(g.ambient);
-            if (g.musicLoaded) SetMusicVolume(g.ambient, g.muted ? 0.0f : 0.22f);
+            if (g.musicLoaded) SetMusicVolume(g.ambient, 0.22f);
         }
     }
     if (g.audioReady && g.musicLoaded) PlayMusicStream(g.ambient);
@@ -235,94 +210,41 @@ static void FirstAudioGesture(void)
 
 static void PlaySfx(SoundId id)
 {
-    if (!g.muted && g.audioReady && id >= 0 && id < SFX_COUNT && IsSoundValid(g.sounds[id])) PlaySound(g.sounds[id]);
+    if (g.audioReady && id >= 0 && id < SFX_COUNT && IsSoundValid(g.sounds[id])) PlaySound(g.sounds[id]);
 }
 
-static void ToggleMute(void)
+/* ---------- Three personal bests: one score per difficulty ---------- */
+static void SaveBestScores(void)
 {
-    g.muted = !g.muted;
-    if (g.audioReady && g.musicLoaded) SetMusicVolume(g.ambient, g.muted ? 0.0f : 0.22f);
-}
-
-/* ---------- Score history: personal to this browser/device ---------- */
-static bool EnsureScoreCapacity(int desired)
-{
-    if (desired <= g.scoreCapacity) return true;
-    int capacity = (g.scoreCapacity > 0) ? g.scoreCapacity * 2 : 16;
-    while (capacity < desired && capacity < 1073741823) capacity *= 2;
-    if (capacity < desired) return false;
-    ScoreEntry *grown = (ScoreEntry *)realloc(g.scores, (size_t)capacity * sizeof(ScoreEntry));
-    if (!grown) return false;
-    g.scores = grown;
-    g.scoreCapacity = capacity;
-    return true;
-}
-
-static void SaveScores(void)
-{
-    FILE *f = fopen(RR_SCORE_TEMP, "w");
+    FILE *f = fopen(RR_SCORE_FILE, "w");
     if (!f) return;
-    for (int i = 0; i < g.scoreCount; ++i) {
-        fprintf(f, "%d %d %d %d\n", g.scores[i].score, g.scores[i].difficulty, g.scores[i].stage, g.scores[i].kills);
-    }
+    fprintf(f, "%d %d %d\n", g.bestScores[0], g.bestScores[1], g.bestScores[2]);
     fclose(f);
-    remove(RR_SCORE_FILE);
-    if (rename(RR_SCORE_TEMP, RR_SCORE_FILE) != 0) {
-        /* Some virtual file systems do not support atomic rename consistently. */
-        FILE *src = fopen(RR_SCORE_TEMP, "r");
-        FILE *dst = fopen(RR_SCORE_FILE, "w");
-        if (src && dst) {
-            int ch;
-            while ((ch = fgetc(src)) != EOF) fputc(ch, dst);
-        }
-        if (src) fclose(src);
-        if (dst) fclose(dst);
-        remove(RR_SCORE_TEMP);
-    }
 #if defined(__EMSCRIPTEN__)
     EM_ASM({
-        if (typeof FS !== 'undefined' && typeof IDBFS !== 'undefined') {
-            FS.syncfs(false, function(error) {
-                if (error) console.warn('RIFT RUNNER: could not persist personal scores', error);
-            });
-        }
+        if (typeof FS !== 'undefined' && typeof IDBFS !== 'undefined')
+            FS.syncfs(false, function(error) { if (error) console.warn('RIFT RUNNER: score save failed', error); });
     }, 0);
 #endif
 }
 
-static void InsertScore(int score, int difficulty, int stage, int kills)
-{
-    ScoreEntry e;
-    int insertAt = g.scoreCount;
-    if (!EnsureScoreCapacity(g.scoreCount + 1)) return;
-    e.score = score;
-    e.difficulty = difficulty;
-    e.stage = stage;
-    e.kills = kills;
-    while (insertAt > 0 && g.scores[insertAt - 1].score < e.score) --insertAt;
-    for (int i = g.scoreCount; i > insertAt; --i) g.scores[i] = g.scores[i - 1];
-    g.scores[insertAt] = e;
-    ++g.scoreCount;
-    SaveScores();
-}
-
-static void LoadScores(void)
+static void LoadBestScores(void)
 {
     FILE *f = fopen(RR_SCORE_FILE, "r");
-    int score, diff, stage, kills;
     if (!f) return;
-    while (fscanf(f, "%d %d %d %d", &score, &diff, &stage, &kills) == 4) {
-        if (score < 0 || diff < 0 || diff > 2 || stage < 1 || kills < 0) continue;
-        if (!EnsureScoreCapacity(g.scoreCount + 1)) break;
-        g.scores[g.scoreCount++] = (ScoreEntry){ score, diff, stage, kills };
-    }
+    if (fscanf(f, "%d %d %d", &g.bestScores[0], &g.bestScores[1], &g.bestScores[2]) != 3)
+        for (int i = 0; i < 3; ++i) g.bestScores[i] = -1;
+    for (int i = 0; i < 3; ++i) if (g.bestScores[i] < -1) g.bestScores[i] = -1;
     fclose(f);
-    /* Sort defensively in case a previous save ended mid-write. */
-    for (int i = 1; i < g.scoreCount; ++i) {
-        ScoreEntry key = g.scores[i];
-        int j = i - 1;
-        while (j >= 0 && g.scores[j].score < key.score) { g.scores[j + 1] = g.scores[j]; --j; }
-        g.scores[j + 1] = key;
+}
+
+static void RecordPersonalBest(void)
+{
+    int mode = (int)g.difficulty;
+    g.newPersonalBest = g.bestScores[mode] < 0 || g.score > g.bestScores[mode];
+    if (g.newPersonalBest) {
+        g.bestScores[mode] = g.score;
+        SaveBestScores();
     }
 }
 
@@ -407,8 +329,6 @@ static void ResetWorld(void)
     g.player.fireClock = 0.12f;
     g.player.invulnerable = 0.65f;
     g.player.animation = 0.0f;
-    g.player.dashUses = 0;
-    g.bestBeforeRun = (g.scoreCount > 0) ? g.scores[0].score : 0;
     g.newPersonalBest = false;
 }
 
@@ -417,7 +337,6 @@ static void StartRun(void)
     FirstAudioGesture();
     ResetWorld();
     g.state = STATE_PLAYING;
-    g.scoreScroll = 0;
     Burst(g.player.pos, C_CYAN, 34, 190.0f, 3.3f);
     PlaySfx(SFX_SURGE);
 }
@@ -439,38 +358,33 @@ static void AddBullet(Vector2 pos, Vector2 dir)
 
 static void SpawnEnemy(void)
 {
-    int count = 0;
-    for (int i = 0; i < MAX_ENEMIES; ++i) if (g.enemies[i].active) ++count;
-    int maxAlive = 12 + g.stage * 2 + (int)g.difficulty * 3;
-    if (maxAlive > 65) maxAlive = 65;
-    if (count >= maxAlive) return;
+    int alive = 0;
+    for (int i = 0; i < MAX_ENEMIES; ++i) if (g.enemies[i].active) ++alive;
+    int limit = 8 + g.stage + (int)g.difficulty * 2;
+    if (limit > 38) limit = 38;
+    if (alive >= limit) return;
 
-    const int w = SW(), h = SH();
+    /* Spawn visible red enemies at an edge, initially travelling inward toward
+       a random point—not toward the player. After spawning they roam and bounce. */
+    const float w = (float)SW(), h = (float)SH(), edge = 25.0f;
     Vector2 pos;
-    int side = rand() % 4;
-    if (side == 0) pos = V2(RandF(0, (float)w), -38.0f);
-    else if (side == 1) pos = V2((float)w + 38.0f, RandF(0, (float)h));
-    else if (side == 2) pos = V2(RandF(0, (float)w), (float)h + 38.0f);
-    else pos = V2(-38.0f, RandF(0, (float)h));
-
-    float roll = RandF(0.0f, 1.0f);
-    EnemyKind kind = ENEMY_STALKER;
-    if (g.stage >= 2 && roll > 0.63f) kind = ENEMY_SKITTER;
-    if (g.stage >= 4 && roll > 0.87f) kind = ENEMY_BRUTE;
-
-    float stageSpeed = MinF((float)(g.stage - 1) * 4.1f, 100.0f);
-    const DifficultyInfo *d = GetDifficulty();
-    float speed = d->enemySpeed + stageSpeed;
-    float hp = 1.0f;
-    float radius = 14.0f;
-    int value = 100;
-    if (kind == ENEMY_SKITTER) { speed *= 1.46f; radius = 10.5f; hp = 1.0f; value = 135; }
-    if (kind == ENEMY_BRUTE) { speed *= 0.66f; radius = 21.0f; hp = 3.0f + (g.stage >= 7 ? 1.0f : 0.0f); value = 240; }
-    if (g.stage >= 7 && kind == ENEMY_STALKER) hp += (float)((g.stage - 5) / 5);
+    switch (rand() % 4) {
+        case 0: pos = V2(RandF(edge, w - edge), edge); break;
+        case 1: pos = V2(w - edge, RandF(edge, h - edge)); break;
+        case 2: pos = V2(RandF(edge, w - edge), h - edge); break;
+        default: pos = V2(edge, RandF(edge, h - edge)); break;
+    }
+    Vector2 waypoint = V2(RandF(w * 0.18f, w * 0.82f), RandF(h * 0.18f, h * 0.82f));
+    float heading = atan2f(waypoint.y - pos.y, waypoint.x - pos.x) + RandF(-0.55f, 0.55f);
+    float stageSpeed = MinF((float)(g.stage - 1) * 3.0f, 78.0f);
+    float speed = GetDifficulty()->enemySpeed * 0.70f + stageSpeed;
+    float hp = 2.0f + (float)((g.stage - 1) / 4);
+    if (hp > 5.0f) hp = 5.0f;
 
     for (int i = 0; i < MAX_ENEMIES; ++i) {
         if (!g.enemies[i].active) {
-            g.enemies[i] = (Enemy){ true, pos, V2(0, 0), radius, speed, hp, hp, RandF(0.0f, 6.28f), 0.0f, kind, value };
+            g.enemies[i] = (Enemy){ true, pos, V2(0, 0), 21.0f, speed, hp, hp,
+                                    heading, RandF(0.55f, 1.25f), RandF(-0.9f, 0.9f), 0.0f };
             return;
         }
     }
@@ -494,10 +408,10 @@ static void KillEnemy(Enemy *e)
     g.combo = (g.comboClock > 0.0f) ? g.combo + 1 : 1;
     g.comboClock = 3.2f;
     int bonus = (g.combo > 1) ? ((g.combo > 12) ? 60 : g.combo * 5) : 0;
-    int points = e->scoreValue + bonus;
+    int points = 200 + bonus;
     g.score += points;
     AddFloater(e->pos, points, (g.combo >= 5) ? C_GOLD : C_CYAN);
-    Burst(e->pos, e->kind == ENEMY_BRUTE ? C_PINK : C_PURPLE, e->kind == ENEMY_BRUTE ? 30 : 18, e->kind == ENEMY_BRUTE ? 235 : 175, 3.4f);
+    Burst(e->pos, C_RED, 26, 215.0f, 3.2f);
     PlaySfx(SFX_ENEMY_DOWN);
     if ((rand() % 100) < 28) AddPickup(e->pos, PICKUP_DATA);
     else if ((rand() % 100) < 9) AddPickup(e->pos, PICKUP_REPAIR);
@@ -514,8 +428,7 @@ static void EndRun(void)
 {
     if (g.state != STATE_PLAYING) return;
     g.state = STATE_GAME_OVER;
-    g.newPersonalBest = g.score > g.bestBeforeRun;
-    InsertScore(g.score, (int)g.difficulty, g.stage, g.kills);
+    RecordPersonalBest();
     g.screenShake = 0.42f;
     g.flashAlpha = 0.32f;
     Burst(g.player.pos, C_PINK, 55, 260.0f, 4.0f);
@@ -578,7 +491,6 @@ static void UpdatePlayer(float dt)
         p->dashTime = 0.17f;
         p->dashClock = 1.12f;
         p->invulnerable = MaxF(p->invulnerable, 0.24f);
-        ++p->dashUses;
         PlaySfx(SFX_DASH);
         Burst(p->pos, C_CYAN, 17, 145.0f, 2.5f);
     } else if (p->dashTime > 0.0f) {
@@ -598,7 +510,7 @@ static void UpdatePlayer(float dt)
     p->pos.x = ClampF(p->pos.x, 28.0f, (float)SW() - 28.0f);
     p->pos.y = ClampF(p->pos.y, 34.0f, (float)SH() - 30.0f);
 
-    /* The runner auto-fires along its facing direction. Hold mouse to aim at the cursor. */
+    /* Automatic blaster fire follows the runner facing; hold mouse to aim. */
     if (p->fireClock <= 0.0f) {
         AddBullet(p->pos, p->facing);
         p->fireClock = d->fireInterval;
@@ -634,19 +546,28 @@ static void UpdateBullets(float dt)
 
 static void UpdateEnemies(float dt)
 {
-    const DifficultyInfo *d = GetDifficulty();
-    float damage = d->contactDamage;
+    const float w = (float)SW(), h = (float)SH();
+    float damage = GetDifficulty()->contactDamage;
     for (int i = 0; i < MAX_ENEMIES; ++i) {
         Enemy *e = &g.enemies[i];
         if (!e->active) continue;
+
         e->flash = MaxF(0.0f, e->flash - dt);
-        e->phase += dt * (e->kind == ENEMY_SKITTER ? 6.5f : 2.6f);
-        Vector2 toPlayer = Normalize(Sub(g.player.pos, e->pos));
-        Vector2 dir = toPlayer;
-        if (e->kind == ENEMY_SKITTER) dir = Normalize(Add(toPlayer, Scale(Perp(toPlayer), sinf(e->phase) * 0.62f)));
+        e->turnClock -= dt;
+        if (e->turnClock <= 0.0f) {
+            e->turnRate = RandF(-0.9f, 0.9f);
+            e->turnClock = RandF(0.55f, 1.25f);
+        }
+        e->heading += e->turnRate * dt;
         float stageFactor = 1.0f + MinF((float)(g.stage - 1) * 0.028f, 0.48f);
-        e->vel = Scale(dir, e->speed * stageFactor);
+        e->vel = Scale(V2(cosf(e->heading), sinf(e->heading)), e->speed * stageFactor);
         e->pos = Add(e->pos, Scale(e->vel, dt));
+
+        /* Bounce off the arena edges so the red enemies keep roaming on-screen. */
+        if (e->pos.x < e->radius) { e->pos.x = e->radius; e->heading = PI_F - e->heading; e->turnRate = -e->turnRate; }
+        if (e->pos.x > w - e->radius) { e->pos.x = w - e->radius; e->heading = PI_F - e->heading; e->turnRate = -e->turnRate; }
+        if (e->pos.y < e->radius) { e->pos.y = e->radius; e->heading = -e->heading; e->turnRate = -e->turnRate; }
+        if (e->pos.y > h - e->radius) { e->pos.y = h - e->radius; e->heading = -e->heading; e->turnRate = -e->turnRate; }
 
         float r = e->radius + 15.0f;
         if (DistSq(e->pos, g.player.pos) < r * r && g.player.invulnerable <= 0.0f && g.player.dashTime <= 0.0f) {
@@ -698,7 +619,6 @@ static void UpdatePickups(float dt)
 static void UpdatePlaying(float dt)
 {
     if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ESCAPE)) { g.state = STATE_PAUSED; return; }
-    if (IsKeyPressed(KEY_M)) ToggleMute();
 
     UpdatePlayer(dt);
     UpdateBullets(dt);
@@ -801,29 +721,18 @@ static void DrawRunner(void)
 
 static void DrawEnemy(const Enemy *e)
 {
-    Color color = e->kind == ENEMY_STALKER ? C_PINK : (e->kind == ENEMY_SKITTER ? C_PURPLE : C_RED);
-    if (e->flash > 0.0f) color = C_TEXT;
+    Color red = e->flash > 0.0f ? C_GOLD : C_RED;
     float r = e->radius;
-    DrawCircleGradient(e->pos, r * 2.3f, WithOpacity(color, 0.25f), (Color){ color.r, color.g, color.b, 0 });
-    if (e->kind == ENEMY_STALKER) {
-        DrawPoly(e->pos, 6, r, g.worldTime * 45.0f + e->phase * 25.0f, color);
-        DrawPoly(e->pos, 6, r * 0.57f, -g.worldTime * 70.0f, (Color){ 32, 15, 42, 255 });
-        DrawCircleV(Add(e->pos, V2(-r * 0.22f, -r * 0.1f)), 2.3f, C_TEXT);
-        DrawCircleV(Add(e->pos, V2(r * 0.22f, -r * 0.1f)), 2.3f, C_TEXT);
-    } else if (e->kind == ENEMY_SKITTER) {
-        Vector2 f = Normalize(Sub(g.player.pos, e->pos));
-        Vector2 s = Perp(f);
-        DrawTriangle(Add(e->pos, Scale(f, r * 1.4f)), Add(Add(e->pos, Scale(f, -r)), Scale(s, r * 0.8f)), Add(Add(e->pos, Scale(f, -r)), Scale(s, -r * 0.8f)), color);
-        DrawCircleV(Add(e->pos, Scale(f, r * 0.15f)), 2.5f, C_TEXT);
-    } else {
-        DrawCircleV(e->pos, r, color);
-        DrawCircleLines((int)e->pos.x, (int)e->pos.y, r, (Color){ 255, 213, 225, 240 });
-        DrawRectangleRounded((Rectangle){ e->pos.x - r * 0.35f, e->pos.y - 3.0f, r * 0.7f, 6.0f }, 0.3f, 4, (Color){ 44, 15, 34, 255 });
-    }
+    Vector2 forward = V2(cosf(e->heading), sinf(e->heading));
+    DrawCircleGradient(e->pos, r * 2.5f, WithOpacity(C_RED, 0.34f), (Color){ 255, 83, 99, 0 });
+    DrawCircleV(e->pos, r, red);
+    DrawCircleLines((int)e->pos.x, (int)e->pos.y, r, (Color){ 255, 172, 180, 255 });
+    DrawLineEx(Add(e->pos, Scale(forward, -r * 0.48f)), Add(e->pos, Scale(forward, r * 0.50f)), 5.0f, (Color){ 76, 12, 28, 255 });
+    DrawCircleV(Add(e->pos, Scale(forward, r * 0.22f)), 3.2f, C_GOLD);
     if (e->hp < e->maxHp) {
-        float barW = r * 2.1f;
-        DrawRectangleRounded((Rectangle){ e->pos.x - barW * 0.5f, e->pos.y - r - 8.0f, barW, 3.0f }, 0.5f, 4, (Color){ 20, 25, 46, 230 });
-        DrawRectangleRounded((Rectangle){ e->pos.x - barW * 0.5f, e->pos.y - r - 8.0f, barW * ClampF(e->hp / e->maxHp, 0, 1), 3.0f }, 0.5f, 4, C_PINK);
+        float barW = r * 2.2f;
+        DrawRectangleRounded((Rectangle){ e->pos.x - barW * 0.5f, e->pos.y - r - 9.0f, barW, 4.0f }, 0.5f, 4, (Color){ 20, 25, 46, 230 });
+        DrawRectangleRounded((Rectangle){ e->pos.x - barW * 0.5f, e->pos.y - r - 9.0f, barW * ClampF(e->hp / e->maxHp, 0, 1), 4.0f }, 0.5f, 4, C_GOLD);
     }
 }
 
@@ -845,7 +754,7 @@ static void DrawWorld(void)
         Vector2 tail = Sub(b->pos, Scale(Normalize(b->vel), 16.0f));
         DrawLineEx(tail, b->pos, 3.0f, WithOpacity(b->color, 0.45f));
         DrawCircleGradient(b->pos, 10.0f, WithOpacity(b->color, 0.56f), (Color){ b->color.r, b->color.g, b->color.b, 0 });
-        DrawCircleV(b->pos, b->radius, C_TEXT);
+        DrawCircleV(b->pos, b->radius, C_CYAN);
     }
     for (int i = 0; i < MAX_ENEMIES; ++i) if (g.enemies[i].active) DrawEnemy(&g.enemies[i]);
     for (int i = 0; i < MAX_PARTICLES; ++i) {
@@ -937,7 +846,6 @@ static void DrawHUD(void)
         int size = (SW() < 760) ? 16 : 21;
         DrawCentered(buf, (int)(SH() * 0.23f), size, Alpha(C_GOLD, a * 255.0f));
     }
-    if (g.muted) DrawText("SOUND OFF [M]", w - 155, SH() - 28, 10, C_MUTED);
 }
 
 static void DrawButton(Rectangle r, const char *label, Color accent, bool selected)
@@ -984,76 +892,38 @@ static void DrawTitle(void)
     DrawButton(startBtn, "ENTER THE RIFT  [ENTER]", C_CYAN, true);
     DrawCentered("WASD / ARROWS MOVE  ·  AUTO-FIRE FOLLOWS FACING", (int)(h * 0.755f), 12, C_TEXT);
     DrawCentered("HOLD LEFT MOUSE TO AIM  ·  SPACE / SHIFT TO PHASE DASH", (int)(h * 0.79f), 11, C_MUTED);
-    DrawCentered("B  PERSONAL SCORE HISTORY       M  SOUND       ESC  QUIT", (int)(h * 0.85f), 11, C_MUTED);
+    DrawCentered("B  PERSONAL BESTS       ESC  QUIT", (int)(h * 0.85f), 11, C_MUTED);
     DrawCentered("EVERY STAGE ADVANCES AT SCORE MILESTONES — NOT BY ELAPSED TIME", (int)(h * 0.91f), 10, (Color){ 111, 128, 176, 255 });
-}
-
-static int ScoreRowsVisible(void)
-{
-    if (SH() < 460) return 4;
-    if (SH() < 600) return 5;
-    if (SH() < 700) return 6;
-    return 8;
-}
-
-static int ScoreRowStep(void)
-{
-    if (SH() < 460) return 25;
-    if (SH() < 600) return 29;
-    if (SH() < 700) return 34;
-    return 37;
 }
 
 static void DrawScores(void)
 {
     int w = SW(), h = SH();
-    char buf[96];
-    DrawCentered("PERSONAL SCORE HISTORY", (int)(h * 0.10f), (w < 440) ? 20 : 30, C_TEXT);
-    DrawCentered("SORTED HIGHEST TO LOWEST  ·  SAVED ON THIS DEVICE", (int)(h * 0.155f), 11, C_MUTED);
-    Rectangle panel = { (float)w * 0.5f - MinF(450.0f, (float)w * 0.44f), (float)h * 0.215f, MinF(900.0f, (float)w * 0.88f), (float)h * 0.60f };
-    DrawPanel(panel, C_PURPLE);
-    bool compact = w < 780;
-    int left = (int)panel.x + (compact ? 12 : 26);
-    int scoreX = left + (compact ? 25 : 54);
-    int diffX = left + (compact ? 112 : 250);
-    int stageX = left + (compact ? 220 : 410);
-    int killsX = left + (compact ? 267 : 510);
-    int rowY = (int)panel.y + 24;
-    int headSize = compact ? 9 : 12;
-    DrawText("#", left, rowY, headSize, C_MUTED);
-    DrawText(compact ? "SCORE" : "SCORE", scoreX, rowY, headSize, C_CYAN);
-    DrawText(compact ? "MODE" : "DIFFICULTY", diffX, rowY, headSize, C_MUTED);
-    DrawText(compact ? "STG" : "RIFT", stageX, rowY, headSize, C_MUTED);
-    DrawText(compact ? "K" : "KILLS", killsX, rowY, headSize, C_MUTED);
-    DrawLine(left, rowY + 24, (int)(panel.x + panel.width - 24), rowY + 24, (Color){ 72, 88, 137, 190 });
+    int titleSize = (w < 440) ? 21 : 30;
+    DrawCentered("PERSONAL BESTS", (int)(h * 0.10f), titleSize, C_TEXT);
+    DrawCentered("ONE HIGH SCORE PER MODE  ·  SAVED ON THIS DEVICE", (int)(h * 0.16f), 11, C_MUTED);
 
-    int availableRows = ScoreRowsVisible();
-    int rowStep = ScoreRowStep();
-    int y = rowY + (SH() < 460 ? 35 : 40);
-    if (g.scoreCount == 0) {
-        DrawCentered("NO RUNS RECORDED YET", (int)(panel.y + panel.height * 0.50f), 18, C_MUTED);
-        DrawCentered("FINISH A RUN TO START YOUR PERSONAL LEADERBOARD", (int)(panel.y + panel.height * 0.50f + 32), 11, C_MUTED);
-    } else {
-        int maxScroll = (g.scoreCount > availableRows) ? g.scoreCount - availableRows : 0;
-        g.scoreScroll = (int)ClampF((float)g.scoreScroll, 0.0f, (float)maxScroll);
-        for (int i = g.scoreScroll; i < g.scoreCount && i < g.scoreScroll + availableRows; ++i) {
-            ScoreEntry *e = &g.scores[i];
-            int row = i - g.scoreScroll;
-            Color rowColor = (row % 2 == 0) ? (Color){ 228, 237, 255, 255 } : C_MUTED;
-            snprintf(buf, sizeof(buf), "%02d", i + 1);
-            DrawText(buf, left, y, compact ? 12 : 17, i == 0 ? C_GOLD : rowColor);
-            snprintf(buf, sizeof(buf), compact ? "%d" : "%07d", e->score);
-            DrawText(buf, scoreX, y, compact ? 13 : 18, i == 0 ? C_GOLD : C_TEXT);
-            DrawText(compact ? (e->difficulty == DIFF_EASY ? "EASY" : (e->difficulty == DIFF_MEDIUM ? "MED" : "HARD")) : DIFFICULTIES[e->difficulty].name,
-                     diffX, y + (compact ? 2 : 2), compact ? 9 : 12, DIFFICULTIES[e->difficulty].color);
-            snprintf(buf, sizeof(buf), "%02d", e->stage);
-            DrawText(buf, stageX, y, compact ? 12 : 17, rowColor);
-            snprintf(buf, sizeof(buf), "%02d", e->kills);
-            DrawText(buf, killsX, y, compact ? 12 : 17, rowColor);
-            y += rowStep;
-        }
-        snprintf(buf, sizeof(buf), "SHOWING %d–%d OF %d  ·  UP / DOWN TO SCROLL", g.scoreScroll + 1, (g.scoreScroll + availableRows < g.scoreCount) ? g.scoreScroll + availableRows : g.scoreCount, g.scoreCount);
-        DrawCentered(buf, (int)(panel.y + panel.height - 28), 10, C_MUTED);
+    float panelW = MinF(700.0f, (float)w * 0.90f);
+    float rowH = MinF(76.0f, (float)h * 0.105f);
+    float panelH = rowH * 3.0f + 54.0f;
+    Rectangle panel = { ((float)w - panelW) * 0.5f, ((float)h - panelH) * 0.51f, panelW, panelH };
+    DrawPanel(panel, C_PURPLE);
+
+    for (int i = 0; i < 3; ++i) {
+        const DifficultyInfo *d = &DIFFICULTIES[i];
+        float y = panel.y + 18.0f + i * rowH;
+        Rectangle row = { panel.x + 12.0f, y, panel.width - 24.0f, rowH - 7.0f };
+        DrawRectangleRounded(row, 0.16f, 8, (Color){ 21, 29, 59, 235 });
+        DrawRectangleRoundedLinesEx(row, 0.16f, 8, 1.2f, WithOpacity(d->color, 0.65f));
+        DrawText(d->name, (int)row.x + 16, (int)(row.y + row.height * 0.5f - 10), 16, d->color);
+        DrawText("HIGH SCORE", (int)row.x + (w < 480 ? 90 : 170), (int)row.y + 9, 9, C_MUTED);
+        char scoreText[32];
+        if (g.bestScores[i] >= 0) snprintf(scoreText, sizeof(scoreText), "%07d", g.bestScores[i]);
+        else snprintf(scoreText, sizeof(scoreText), "N/A");
+        int scoreSize = (w < 480) ? 19 : 24;
+        DrawRight(scoreText, (int)(row.x + row.width - 16.0f), (int)(row.y + row.height * 0.5f - scoreSize * 0.5f), scoreSize,
+                  g.bestScores[i] >= 0 ? C_TEXT : C_MUTED);
+        if (g.bestScores[i] < 0) DrawText("PLAY THIS MODE TO SET A RECORD", (int)row.x + (w < 480 ? 90 : 170), (int)row.y + 24, 9, C_MUTED);
     }
     DrawCentered("B / ESC  BACK", (int)(h * 0.88f), 13, C_CYAN);
 }
@@ -1074,11 +944,11 @@ static void DrawGameOver(void)
     DrawCentered(buf, (int)p.y + (int)(105 * scaleY), (w < 440) ? 38 : 51, C_TEXT);
     snprintf(buf, sizeof(buf), "%s    /    RIFT %02d    /    %d KILLS", GetDifficulty()->name, g.stage, g.kills);
     DrawCentered(buf, (int)p.y + (int)(167 * scaleY), (w < 440) ? 9 : 12, GetDifficulty()->color);
-    if (g.newPersonalBest) DrawCentered("NEW PERSONAL BEST!", (int)p.y + (int)(207 * scaleY), 16, C_GOLD);
-    else DrawCentered("SCORE SAVED TO YOUR PERSONAL HISTORY", (int)p.y + (int)(207 * scaleY), (w < 440) ? 9 : 11, C_MUTED);
+    if (g.newPersonalBest) DrawCentered("NEW PERSONAL BEST FOR THIS MODE!", (int)p.y + (int)(207 * scaleY), (w < 440) ? 11 : 15, C_GOLD);
+    else DrawCentered("MODE BEST: SCORE NOT BEATEN", (int)p.y + (int)(207 * scaleY), (w < 440) ? 9 : 11, C_MUTED);
     Rectangle again = { p.x + 24, p.y + panelH * 0.64f, p.width - 48, 50 };
     DrawButton(again, "RUN AGAIN  [ENTER]", C_CYAN, true);
-    DrawCentered("M  TITLE     B  SCORE HISTORY", (int)p.y + (int)(348 * scaleY), 11, C_MUTED);
+    DrawCentered("ESC  TITLE     B  PERSONAL BESTS", (int)p.y + (int)(348 * scaleY), 11, C_MUTED);
 }
 
 static void DrawPause(void)
@@ -1087,7 +957,7 @@ static void DrawPause(void)
     DrawRectangle(0, 0, w, h, (Color){ 3, 4, 13, 178 });
     DrawCentered("PAUSED", (int)(h * 0.40f), 42, C_TEXT);
     DrawCentered("P / ENTER  RESUME", (int)(h * 0.50f), 15, C_CYAN);
-    DrawCentered("B  SCORE HISTORY       M  SOUND", (int)(h * 0.55f), 12, C_MUTED);
+    DrawCentered("B  PERSONAL BESTS       ENTER / P  RESUME", (int)(h * 0.55f), 12, C_MUTED);
 }
 
 static void DrawTouchControls(void)
@@ -1160,24 +1030,23 @@ static void InitGame(void)
     g.difficulty = DIFF_MEDIUM;
     g.menuSelection = DIFF_MEDIUM;
     g.worldTime = 0.0f;
-    srand(0x51A6A1u);
+    for (int i = 0; i < 3; ++i) g.bestScores[i] = -1;
+    srand((unsigned int)time(NULL));
     for (int i = 0; i < MAX_STARS; ++i) {
         g.stars[i] = (Star){ RandF(0.0f, (float)SCREEN_START_W), RandF(0.0f, (float)SCREEN_START_H), RandF(5.0f, 25.0f), RandF(0.6f, 1.8f), RandF(0.0f, 6.28f) };
     }
-    LoadScores();
+    LoadBestScores();
 
 }
 
-static void UpdateTitle(float dt)
+static void UpdateTitle(void)
 {
-    g.menuPulse += dt;
     if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) SetDifficulty(g.menuSelection - 1);
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) SetDifficulty(g.menuSelection + 1);
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_KP_1)) SetDifficulty(DIFF_EASY);
     if (IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_KP_2)) SetDifficulty(DIFF_MEDIUM);
     if (IsKeyPressed(KEY_THREE) || IsKeyPressed(KEY_KP_3)) SetDifficulty(DIFF_HARD);
-    if (IsKeyPressed(KEY_B)) { g.state = STATE_SCORES; g.scoreScroll = 0; }
-    if (IsKeyPressed(KEY_M)) ToggleMute();
+    if (IsKeyPressed(KEY_B)) g.state = STATE_SCORES;
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { StartRun(); return; }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -1197,15 +1066,13 @@ static void UpdateTitle(float dt)
 static void UpdatePaused(void)
 {
     if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) g.state = STATE_PLAYING;
-    if (IsKeyPressed(KEY_B)) { g.state = STATE_SCORES; g.scoreScroll = 0; }
-    if (IsKeyPressed(KEY_M)) ToggleMute();
+    if (IsKeyPressed(KEY_B)) g.state = STATE_SCORES;
 }
 
 static void UpdateGameOver(void)
 {
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) StartRun();
-    if (IsKeyPressed(KEY_M)) ToggleMute();
-    if (IsKeyPressed(KEY_B)) { g.state = STATE_SCORES; g.scoreScroll = 0; }
+    if (IsKeyPressed(KEY_B)) g.state = STATE_SCORES;
     if (IsKeyPressed(KEY_ESCAPE)) { g.state = STATE_TITLE; }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         float panelW = MinF(476.0f, (float)SW() - 24.0f);
@@ -1217,18 +1084,7 @@ static void UpdateGameOver(void)
 
 static void UpdateScores(void)
 {
-    if (IsKeyPressed(KEY_B) || IsKeyPressed(KEY_ESCAPE)) {
-        g.state = STATE_TITLE;
-        return;
-    }
-    if (IsKeyPressed(KEY_DOWN)) ++g.scoreScroll;
-    if (IsKeyPressed(KEY_UP)) --g.scoreScroll;
-    if (IsKeyPressed(KEY_PAGE_DOWN)) g.scoreScroll += 8;
-    if (IsKeyPressed(KEY_PAGE_UP)) g.scoreScroll -= 8;
-    int visibleRows = ScoreRowsVisible();
-    int maxScroll = (g.scoreCount > visibleRows) ? g.scoreCount - visibleRows : 0;
-    if (g.scoreScroll < 0) g.scoreScroll = 0;
-    if (g.scoreScroll > maxScroll) g.scoreScroll = maxScroll;
+    if (IsKeyPressed(KEY_B) || IsKeyPressed(KEY_ESCAPE)) g.state = STATE_TITLE;
 }
 
 static void Frame(void)
@@ -1243,7 +1099,7 @@ static void Frame(void)
         if (!IsMusicStreamPlaying(g.ambient)) PlayMusicStream(g.ambient);
     }
     switch (g.state) {
-        case STATE_TITLE: UpdateTitle(dt); UpdateEffects(dt); break;
+        case STATE_TITLE: UpdateTitle(); UpdateEffects(dt); break;
         case STATE_PLAYING: UpdatePlaying(dt); break;
         case STATE_PAUSED: UpdatePaused(); UpdateEffects(dt); break;
         case STATE_GAME_OVER: UpdateGameOver(); UpdateEffects(dt); break;
@@ -1255,16 +1111,11 @@ static void Frame(void)
 #if !defined(__EMSCRIPTEN__)
 static void ShutdownGame(void)
 {
-    SaveScores();
     if (g.audioReady) {
         if (g.musicLoaded) { StopMusicStream(g.ambient); UnloadMusicStream(g.ambient); }
         for (int i = 0; i < SFX_COUNT; ++i) if (IsSoundValid(g.sounds[i])) UnloadSound(g.sounds[i]);
         CloseAudioDevice();
     }
-    free(g.scores);
-    g.scores = NULL;
-    g.scoreCount = 0;
-    g.scoreCapacity = 0;
 }
 #endif
 

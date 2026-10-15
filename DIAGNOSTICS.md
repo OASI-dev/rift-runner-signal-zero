@@ -18,7 +18,7 @@ Browsers can restrict audio before a user gesture. Click inside the game or pres
 
 ## Scores disappear or fail to persist
 
-The browser uses Emscripten IDBFS at `/persist`. Check that `web/idbfs-pre.js` is passed as `--pre-js`, the IDBFS filesystem is mounted before the runtime starts, and the browser allows site storage. Score history is local to each browser profile/device.
+The browser uses Emscripten IDBFS at `/persist`. Check that `web/idbfs-pre.js` is passed as `--pre-js`, the IDBFS filesystem is mounted before the runtime starts, and the browser allows site storage. The three per-mode personal bests are local to each browser profile/device and are stored in `/persist/rift_runner_bests.txt`.
 
 ## Desktop build fails to open a window
 

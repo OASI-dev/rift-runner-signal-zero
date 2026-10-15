@@ -1,13 +1,13 @@
-# Release status — v0.17.0 single-file rebuild
+# Release status — v0.19.0 candidate
 
-This is a rebuilt candidate source package. It is prepared for GitHub Actions to compile a native Linux target and an Emscripten browser target. The local environment cannot fetch/build raylib 6.0 or Emscripten, so the actual game binary, browser gameplay, and the new deployment have **not** been independently verified here.
+The personal leaderboard now contains exactly three local records: one highest score for Easy, one for Medium, and one for Hard. The old unbounded run history, sorting, allocation, and scrolling code have been removed. All gameplay remains in root-level `main.c`.
 
-Before announcing this version as live:
+Validation performed for this package:
 
-1. Push the update to the GitHub repository.
-2. Confirm **Native build check** passes.
-3. Confirm **Build and publish browser game** passes both compile and deploy jobs.
-4. Open the published page and verify title screen, mouse/keyboard controls, sound, difficulty, score progression, and score persistence after refresh.
-5. Test touch input separately on a real mobile browser before promising complete mobile support.
+- `main.c` passed strict C99 native-mode syntax validation against a test-only raylib API stub with warnings treated as errors.
+- `main.c` passed GNU C99 Emscripten-conditional syntax validation against test-only raylib/Emscripten API stubs with warnings treated as errors.
+- A focused save/load smoke test confirmed that Easy, Medium, and Hard each keep their own best score, lower runs do not replace a record, and the three values reload correctly.
+- The source was checked to confirm the old dynamic-history fields/functions are removed.
+- The seven bundled WAV assets remain present and are validated separately by `tools/check_assets.py`.
 
-The browser scoreboard is local to the browser profile. It is not a shared online leaderboard.
+These are source-level checks, not a real raylib/Emscripten link or gameplay session. The native build, browser build/deployment, persistence across reload, and live gameplay still need to pass GitHub Actions and manual play-testing.

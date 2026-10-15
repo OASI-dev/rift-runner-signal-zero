@@ -8,7 +8,7 @@ Thanks for helping with RIFT RUNNER: SIGNAL ZERO.
 - Keep build/deployment instructions, browser hosting glue, workflows, and bundled WAV assets in their own files.
 - Do not vendor raylib source into the repository; CMake fetches raylib 6.0 for builds.
 - Avoid survival-time scoring UI. Rift Stage pressure must progress from score milestones.
-- Describe the personal scoreboard as local-to-device; do not label it an online/global leaderboard.
+- Keep exactly three local personal bests (Easy, Medium, Hard); do not label them an online/global leaderboard.
 
 ## Local checks
 

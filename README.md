@@ -16,11 +16,12 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
 - **Phase dash:** Space or either Shift key; briefly grants invulnerability.
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
+- **Red enemies only:** the hard-to-see small/purple/pink enemy types are removed. Red enemies are larger and brighter; they roam in changing random directions and bounce around the arena instead of homing in on the player.
 - **Score-driven stages:** the next Rift Stage starts at each 500-point milestone. Spawn pressure and enemy speed increase based on score stage, not simply because time elapsed.
 - **Score is the objective:** no survival-time counter is displayed. Kills, combos, and pickups grant points.
-- **Personal score history:** press **B** on the title/game-over screen. All completed runs are stored in descending score order, with score, difficulty, stage, and kills. The browser edition saves to the current browser profile using IndexedDB-backed storage. This is a personal/local leaderboard, not an online global leaderboard.
+- **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
 - **Pause/resume:** P or Esc during a run, then P/Enter/Esc to resume.
-- **Sound:** M toggles sound.
+- **Sound:** all music and effects are always on after you start a run. There is no sound toggle.
 
 ### Touch screens
 
@@ -47,7 +48,7 @@ rift-runner-signal-zero/
 
 ## Score storage and privacy
 
-Scores are kept locally on the player's device/browser. They are not sent to a server. Clearing browser data can clear the browser leaderboard. A shared leaderboard where players see one another's scores would need a backend service and abuse prevention, and is intentionally not claimed in this version.
+The three personal bests are stored locally as three integers, one per difficulty. They are not sent to a server. Clearing browser data can clear browser records. A cross-player online leaderboard would require a backend service and abuse prevention, and is not claimed in this version.
 
 ## License
 
