@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.24.0 — distraction cleanup
+
+- Removed combo tracking, combo score bonuses, the combo HUD, kill counters, and floating point popups.
+- Removed repair/health-kit and data-chip pickups; the banana is now the only pickup.
+- The banana restores up to 18 health and grants a 5-second shield.
+- Enemy defeats award a fixed 200 score without extra counters or random loot.
+- Simplified pickup and effects state to remove unused data and reduce visual clutter.
+
 ## v0.23.0 — final presentation and usability polish
 
 - Added a named sector label and a progress meter showing how close the run is to the next 1,000-point environment shift.

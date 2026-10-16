@@ -39,32 +39,7 @@ static void DrawBananaPickup(const Pickup *p, float r)
 static void DrawPickup(const Pickup *p)
 {
     float pulse = 1.0f + sinf(p->phase * 1.6f) * 0.08f;
-    if (p->kind == PICKUP_BANANA) {
-        DrawBananaPickup(p, 12.0f * pulse);
-        return;
-    }
-
-    Color c = p->kind == PICKUP_DATA ? C_CYAN : C_GREEN;
-    DrawCircleGradient(p->pos, 19.0f * pulse, WithOpacity(c, 0.24f), WithOpacity(c, 0.0f));
-    if (p->kind == PICKUP_DATA) {
-        /* Data fragments: beveled hex chip with a bright central core. */
-        DrawPoly(p->pos, 6, 7.6f * pulse, 30.0f, (Color){ 13, 76, 111, 255 });
-        DrawPolyLines(p->pos, 6, 7.6f * pulse, 30.0f, C_CYAN);
-        DrawLineEx(V2(p->pos.x - 3.0f, p->pos.y), V2(p->pos.x + 3.0f, p->pos.y), 1.5f, C_TEXT);
-        DrawLineEx(V2(p->pos.x, p->pos.y - 3.0f), V2(p->pos.x, p->pos.y + 3.0f), 1.5f, C_TEXT);
-    } else {
-        /* Repair cell: a green capsule/cross remains readable at small size. */
-        DrawRectangleRounded((Rectangle){ p->pos.x - 7.0f * pulse, p->pos.y - 7.0f * pulse,
-                                            14.0f * pulse, 14.0f * pulse }, 0.25f, 5,
-                             (Color){ 17, 77, 61, 255 });
-        DrawRectangle((int)(p->pos.x - 2.0f * pulse), (int)(p->pos.y - 5.0f * pulse),
-                      (int)(4.0f * pulse), (int)(10.0f * pulse), C_GREEN);
-        DrawRectangle((int)(p->pos.x - 5.0f * pulse), (int)(p->pos.y - 2.0f * pulse),
-                      (int)(10.0f * pulse), (int)(4.0f * pulse), C_GREEN);
-        DrawRectangleRoundedLinesEx((Rectangle){ p->pos.x - 7.0f * pulse, p->pos.y - 7.0f * pulse,
-                                                  14.0f * pulse, 14.0f * pulse }, 0.25f, 5, 1.0f,
-                                    WithOpacity(C_GREEN, 0.75f));
-    }
+    DrawBananaPickup(p, 12.0f * pulse);
 }
 
 void DrawWorld(void)

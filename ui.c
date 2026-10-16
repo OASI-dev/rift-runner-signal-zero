@@ -77,7 +77,7 @@ void DrawHUD(void)
         DrawText("SCORE", 18, 16, 9, C_MUTED);
         snprintf(buf, sizeof(buf), "%d", g.score);
         DrawText(buf, 16, 29, 23, C_TEXT);
-        snprintf(buf, sizeof(buf), "RIFT %02d  /  %d K", g.stage, g.kills);
+        snprintf(buf, sizeof(buf), "RIFT LEVEL %02d", g.stage);
         DrawText(buf, 18, 56, 9, C_CYAN);
 
         DrawPanel((Rectangle){ healthX, 8, healthW, 66 }, d->color);
@@ -97,13 +97,12 @@ void DrawHUD(void)
         snprintf(buf, sizeof(buf), "%d%%", (int)(environmentProgress * 100.0f));
         DrawRight(buf, w - 10, 87, 9, C_CYAN);
     } else {
-        /* Score and combat stats. */
+        /* Keep the score panel focused on the only tracked run metric. */
         DrawPanel((Rectangle){ 18, 16, 248, 90 }, C_CYAN);
         DrawText("SCORE", 34, 27, 12, C_MUTED);
         snprintf(buf, sizeof(buf), "%07d", g.score);
         DrawText(buf, 31, 43, 31, C_TEXT);
-        snprintf(buf, sizeof(buf), "%d KILLS", g.kills);
-        DrawText(buf, 34, 80, 11, C_CYAN);
+        DrawText("SURVIVE THE RIFT", 34, 80, 10, C_CYAN);
 
         /* Center sector card: level, named environment and progress to next shift. */
         float sectorX = (float)w * 0.5f - 144.0f;
@@ -146,18 +145,6 @@ void DrawHUD(void)
     if (g.player.shieldTime > 0.0f) {
         snprintf(buf, sizeof(buf), "SHIELD  %.1fs", g.player.shieldTime);
         DrawText(buf, 24, h - 30, 13, C_GOLD);
-    }
-    if (g.combo >= 2 && g.comboClock > 0.0f) {
-        snprintf(buf, sizeof(buf), "COMBO  x%d", g.combo);
-        DrawRight(buf, w - 26, h - 42, 15, C_GOLD);
-    }
-    for (int i = 0; i < MAX_FLOATERS; ++i) {
-        Floater *f = &g.floaters[i];
-        if (!f->active) continue;
-        snprintf(buf, sizeof(buf), "+%d", f->points);
-        int alpha = (int)(255.0f * ClampF(f->life / 0.88f, 0.0f, 1.0f));
-        DrawText(buf, (int)f->pos.x - MeasureText(buf, 15) / 2, (int)f->pos.y, 15,
-                 Alpha(f->color, (float)alpha));
     }
 }
 
@@ -390,7 +377,7 @@ void DrawGameOver(void)
     char buf[100];
     snprintf(buf, sizeof(buf), "%07d", g.score);
     DrawCentered(buf, (int)p.y + (int)(105 * scaleY), (w < 440) ? 38 : 51, C_TEXT);
-    snprintf(buf, sizeof(buf), "%s    /    RIFT %02d    /    %d KILLS", GetDifficulty()->name, g.stage, g.kills);
+    snprintf(buf, sizeof(buf), "%s    /    RIFT LEVEL %02d", GetDifficulty()->name, g.stage);
     DrawCentered(buf, (int)p.y + (int)(167 * scaleY), (w < 440) ? 9 : 12, GetDifficulty()->color);
     if (g.newPersonalBest) DrawCentered("NEW PERSONAL BEST FOR THIS MODE!", (int)p.y + (int)(207 * scaleY), (w < 440) ? 11 : 15, C_GOLD);
     else DrawCentered("MODE BEST: SCORE NOT BEATEN", (int)p.y + (int)(207 * scaleY), (w < 440) ? 9 : 11, C_MUTED);

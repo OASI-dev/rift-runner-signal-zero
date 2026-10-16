@@ -2,7 +2,8 @@
 #define RR_EFFECTS_H
 #include "raylib.h"
 #include <stdbool.h>
-/* Small particles and floating score numbers. */
+
+/* Lightweight visual particles for hits, impacts, and transitions. */
 typedef struct Particle {
     bool active;
     Vector2 pos;
@@ -12,11 +13,4 @@ typedef struct Particle {
     float fullLife;
     Color color;
 } Particle;
-typedef struct Floater {
-    bool active;
-    Vector2 pos;
-    float life;
-    int points;
-    Color color;
-} Floater;
 #endif

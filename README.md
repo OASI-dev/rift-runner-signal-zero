@@ -17,10 +17,10 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
 - **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies gently pursue, and Hard enemies pursue more strongly.
 - **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The entire space environment changes every 1,000 score: ringed worlds, asteroid graveyards, dimensional rifts, a cratered blood moon, and a void cathedral. A named-sector HUD and progress bar show when the next environment shift is coming. Transitions use a soft fade-and-scan, not an exploding radial burst.
-- **Score is the objective:** no survival-time counter is displayed. Kills, combos, and pickups grant points.
+- **Score is the objective:** no kill counter, combo counter, floating point popups, or survival-time counter. Each alien grants a fixed score.
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
 - **Pause/resume:** P or Esc during a run. Resume or return to the flight deck with keyboard, mouse, or touch.
-- **Pickups:** distinct visuals identify the banana (health plus 5-second shield), repair cell, and data chip.
+- **One pickup only:** the golden banana restores up to 18 health and grants a 5-second shield. No health kits, repair cells, or data chips spawn.
 - **Sound:** music and effects are initialized after you start a run. There is no sound toggle.
 
 ### Touch screens
@@ -46,12 +46,12 @@ rift-runner-signal-zero/
 ├── player.c / player.h    # Player movement, aiming and character drawing
 ├── enemies.c / enemy.h    # Enemy spawning, movement, damage and rendering
 ├── bullets.c / bullets.h  # Blaster projectiles and hit detection
-├── pickups.c / pickups.h  # Data, repair and banana pickups
+├── pickups.c / pickups.h  # Banana-only health and shield pickup
 ├── background.c / background.h # Distinct procedural space environments and fade transitions
 ├── colors.c / colors.h    # Shared palette
 ├── audio.c / audio.h      # Sound initialization and playback
 ├── leaderboard.c          # Three personal-best records
-├── effects.c              # Particles and floating score feedback
+├── effects.c              # Lightweight hit particles and screen feedback
 ├── world.c                # Gameplay object draw order
 ├── ui.c                   # Menus, HUD and pause/game-over screens
 ├── helpers.c              # Shared math and drawing helpers
@@ -90,12 +90,12 @@ The code is split by responsibility so the main process is easy to follow:
 - `player.c` / `player.h` — player movement, aiming, shield display and character drawing.
 - `enemies.c` / `enemy.h` — enemy spawning, movement/AI, damage, rewards and drawing.
 - `bullets.c` / `bullets.h` — blaster shots and collision checks.
-- `pickups.c` / `pickups.h` — data, repair and banana pickups.
+- `pickups.c` / `pickups.h` — the single banana health-and-shield pickup.
 - `background.c` / `background.h` — five procedural space environments with fade transitions.
 - `colors.c` / `colors.h` — shared color palette.
 - `audio.c` / `audio.h` — audio initialization and sound playback.
 - `leaderboard.c` — load/save the three personal-best scores.
-- `effects.c` — particles and floating score text.
+- `effects.c` — hit particles and screen feedback.
 - `world.c` — draws the active gameplay objects in layers.
 - `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
 - `helpers.c` — shared math and drawing helpers.

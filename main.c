@@ -34,10 +34,10 @@ void UpdatePlaying(float dt)
     UpdateEnemies(dt);
     if (g.state != STATE_PLAYING) return;
 
-    /* 5. Pickups: apply points, repairs, and the banana's 5-second shield. */
+    /* 5. Pickups: the banana restores health and grants a 5-second shield. */
     UpdatePickups(dt);
 
-    /* 6. Temporary effects: particles, combo timer, screen shake and flashes. */
+    /* 6. Temporary effects: hit particles, screen shake and transition flashes. */
     UpdateEffects(dt);
 
     /* 7. Change to a new space environment every 1,000 score. */
@@ -50,7 +50,7 @@ void UpdatePlaying(float dt)
     g.bananaClock -= dt;
     if (g.bananaClock <= 0.0f) {
         AddPickup(V2(RandF(55.0f, (float)SW() - 55.0f),
-                     RandF(75.0f, (float)SH() - 75.0f)), PICKUP_BANANA);
+                     RandF(75.0f, (float)SH() - 75.0f)));
         g.bananaClock = RandF(22.0f, 34.0f);
     }
 

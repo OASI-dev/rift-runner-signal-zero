@@ -1,4 +1,4 @@
-# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.23.0
+# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.24.0
 
 ## Code/package checks
 
@@ -16,11 +16,12 @@
 - [ ] Red and blue enemy types appear; Easy roams randomly, Medium pursues gently, and Hard pursues more strongly.
 - [ ] Easy, Medium, and Hard have visibly different initial pressure.
 - [ ] Stage pressure increases at score milestones, not only due to elapsed time.
-- [ ] No survival-time counter is shown.
+- [ ] No survival-time, kill, or combo counter is shown; no floating score popups appear.
 - [ ] Leaderboard shows exactly three entries: best Easy, Medium, and Hard scores.
+- [ ] No health kits, repair cells, or data chips spawn.
 - [ ] A new score replaces only its own mode's personal best.
 - [ ] Browser records persist after reload in the same browser/device.
-- [ ] Pause, collision, death, and retry work; sound plays without a mute toggle. Banana pickups heal and provide a five-second shield.
+- [ ] Pause, collision, death, and retry work; sound plays without a mute toggle. The banana is the only pickup and provides health plus a five-second shield.
 - [ ] Touch controls are checked on target browsers before claiming full mobile support.
 
 ## Release

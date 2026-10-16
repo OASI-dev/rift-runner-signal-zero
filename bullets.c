@@ -11,7 +11,7 @@ void AddBullet(Vector2 pos, Vector2 dir)
         if (!g.bullets[i].active) {
             float stageBoost = MinF((float)(g.stage - 1) * 5.0f, 90.0f);
             float spd = 620.0f + stageBoost;
-            g.bullets[i] = (Bullet){ true, Add(pos, Scale(dir, 16.0f)), Scale(dir, spd), 4.0f, 1.32f, (g.combo >= 5) ? C_GOLD : C_CYAN };
+            g.bullets[i] = (Bullet){ true, Add(pos, Scale(dir, 16.0f)), Scale(dir, spd), 4.0f, 1.32f, C_CYAN };
             PlaySfx(SFX_SHOT);
             return;
         }

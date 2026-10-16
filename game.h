@@ -18,8 +18,7 @@
 #define MAX_BULLETS 240
 #define MAX_ENEMIES 90
 #define MAX_PARTICLES 420
-#define MAX_PICKUPS 90
-#define MAX_FLOATERS 32
+#define MAX_PICKUPS 4
 #define MAX_STARS 120
 #define SCORE_STEP 500
 #define PI_F 3.14159265358979323846f
@@ -48,14 +47,13 @@ typedef struct Game {
     Enemy enemies[MAX_ENEMIES];
     Particle particles[MAX_PARTICLES];
     Pickup pickups[MAX_PICKUPS];
-    Floater floaters[MAX_FLOATERS];
     Star stars[MAX_STARS];
     int bestScores[3];
-    int score, kills, stage, combo;
+    int score, stage;
     bool newPersonalBest;
     bool audioReady, musicLoaded, firstAudioGesture, quitRequested;
     float worldTime, spawnClock, screenShake, flashAlpha, stageNotice;
-    float bananaClock, backgroundTransition, comboClock;
+    float bananaClock, backgroundTransition;
     int backgroundTheme, menuSelection;
     Music ambient;
     Sound sounds[SFX_COUNT];
@@ -106,11 +104,10 @@ void UpdateBullets(float dt);
 void SpawnEnemy(void);
 void KillEnemy(Enemy *e);
 void UpdateEnemies(float dt);
-void AddPickup(Vector2 pos, PickupKind kind);
+void AddPickup(Vector2 pos);
 void UpdatePickups(float dt);
 void AddParticle(Vector2 pos, Vector2 vel, float radius, float life, Color color);
 void Burst(Vector2 pos, Color color, int count, float speed, float radius);
-void AddFloater(Vector2 pos, int points, Color color);
 void UpdateEffects(float dt);
 
 /* Rendering: each module draws its own visual layer. */

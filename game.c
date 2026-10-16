@@ -17,13 +17,9 @@ void ResetWorld(void)
     memset(g.enemies, 0, sizeof(g.enemies));
     memset(g.particles, 0, sizeof(g.particles));
     memset(g.pickups, 0, sizeof(g.pickups));
-    memset(g.floaters, 0, sizeof(g.floaters));
     memset(&g.player, 0, sizeof(g.player));
     g.score = 0;
-    g.kills = 0;
     g.stage = 1;
-    g.combo = 0;
-    g.comboClock = 0.0f;
     g.spawnClock = 1.0f;
     g.screenShake = 0.0f;
     g.flashAlpha = 0.0f;

@@ -1,4 +1,4 @@
-/* Enemy spawning, AI, contact damage, rewards and rendering. */
+/* Enemy spawning, AI, contact damage, fixed score awards and rendering. */
 
 #include "game.h"
 #include <math.h>
@@ -43,17 +43,10 @@ void KillEnemy(Enemy *e)
 {
     const int oldStage = g.stage;
     e->active = false;
-    ++g.kills;
-    g.combo = (g.comboClock > 0.0f) ? g.combo + 1 : 1;
-    g.comboClock = 3.2f;
-    int bonus = (g.combo > 1) ? ((g.combo > 12) ? 60 : g.combo * 5) : 0;
-    int points = 200 + bonus;
-    g.score += points;
-    AddFloater(e->pos, points, (g.combo >= 5) ? C_GOLD : C_CYAN);
+    g.score += 200;
     Burst(e->pos, C_RED, 26, 215.0f, 3.2f);
     PlaySfx(SFX_ENEMY_DOWN);
-    if ((rand() % 100) < 28) AddPickup(e->pos, PICKUP_DATA);
-    else if ((rand() % 100) < 9) AddPickup(e->pos, PICKUP_REPAIR);
+
     g.stage = CurrentStageForScore(g.score);
     if (g.stage > oldStage) {
         /* Stage changes are announced cleanly; no burst is emitted at the player. */

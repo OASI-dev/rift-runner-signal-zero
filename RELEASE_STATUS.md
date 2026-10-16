@@ -1,20 +1,15 @@
-# Release status — RIFT RUNNER: SIGNAL ZERO v0.23.0
+# Release status — RIFT RUNNER: SIGNAL ZERO v0.24.0
 
 ## Included in this package
 
-- `main.c` remains the short, commented game-process outline; system logic remains in separate modules.
-- Red wraith and blue skitter enemies have distinct, animated, horror-leaning space-creature silhouettes.
-- Five full procedural space environments rotate every 1,000 score with a quiet fade-and-scan transition, not a radial explosion.
-- HUD now shows the named sector and progress to the next environment change.
-- Pickups have distinct custom visuals: curved banana, cyan data chip, and green repair cross.
-- Title, score, pause, and game-over screens have improved presentation and accessible mouse/touch navigation.
-- Fixed touch aiming so right-side aiming remains independent while the player moves.
-- Screen shake is deterministic, and background transition timing is updated outside of rendering.
+- Removed combo counters, combo score bonuses, kill counters, and floating +points popups.
+- The golden banana is the only pickup; it restores up to 18 health and grants a 5-second shield.
+- Removed repair/health-kit and data-chip spawning and drawing.
+- Enemy defeats award a fixed 200 score. The HUD keeps the main score, rift level, sector name/progress, health, and active shield timer.
+- Existing modular architecture, alien designs, five procedural environments, and 1,000-score soft sector transitions are retained.
+- The three personal-best records (Easy, Medium, Hard) remain unchanged.
 
 ## Verification status
 
-- C99 syntax check across all game source files passed using a test-only raylib API stub.
-- `tools/check_assets.py` passed: all six bundled WAV assets validated.
-- A full CMake build could not finish because FetchContent stalled while trying to download the raylib dependency; this is not a passing native or browser build.
-- A live gameplay session has not been verified in this environment.
-- After pushing this version, confirm that both **Native build check** and **Build and publish browser game** pass in GitHub Actions, then test the deployed Pages game.
+- Source-level checks and bundled asset checks should be run after applying this update.
+- A passing GitHub Actions browser workflow and a live browser play test are required to verify the deployed release.
