@@ -8,8 +8,10 @@ void SpawnEnemy(void)
 {
     int alive = 0;
     for (int i = 0; i < MAX_ENEMIES; ++i) if (g.enemies[i].active) ++alive;
-    int limit = 8 + g.stage + (int)g.difficulty * 2;
-    if (limit > 38) limit = 38;
+    /* Higher modes permit more simultaneous threats, but retain a hard cap. */
+    int limit = 9 + g.stage + (int)g.difficulty * 3;
+    int cap = (g.difficulty == DIFF_HARD) ? 48 : 42;
+    if (limit > cap) limit = cap;
     if (alive >= limit) return;
 
     /* Spawn visible red enemies at an edge, initially travelling inward toward

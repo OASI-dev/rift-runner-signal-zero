@@ -15,7 +15,7 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Character movement:** WASD or arrow keys. The armored runner faces the latest movement direction.
 - **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
-- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies steadily pursue the player, and Hard enemies combine pursuit with randomized steering.
+- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies pursue the player, and Hard enemies combine pursuit with randomized steering plus denser, faster pressure waves.
 - **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The entire space environment changes every 1,000 score: ringed worlds, asteroid graveyards, dimensional rifts, a cratered blood moon, and a void cathedral. A named-sector HUD and progress bar show when the next environment shift is coming. Transitions use a soft fade-and-scan, not an exploding radial burst.
 - **Score is the objective:** no kill counter, combo counter, floating point popups, or survival-time counter. Each alien grants a fixed score.
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
@@ -100,12 +100,13 @@ The code is split by responsibility so the main process is easy to follow:
 - `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
 - `helpers.c` — shared math and drawing helpers.
 
-Start with `main.c` to understand the game flow. It is **127 lines** in v0.25.2; open the named system file for the implementation of any one part.
+Start with `main.c` to understand the game flow. It is **134 lines** in v0.26.0; open the named system file for the implementation of any one part.
 
 
-## v0.25.2 — native linker collision fix and audio rollback
+## v0.26.0 — final difficulty rebalance
 
-- Removed the added space ambience loop, distant whispers/rumble, and rift-change sound. There is still no music; the original five one-shot sound effects remain.
-- Pinned Linux CI and browser workflow runners to Ubuntu 24.04 for a stable CMake/dependency environment.
-- Enabled GNU C99 extensions consistently for raylib's native and browser targets while retaining C99 as the language standard.
-- Renamed the game math helper `Normalize` to `RRNormalizeVector2` to prevent a duplicate-symbol error against raylib internals when linking the desktop build.
+- Rebalanced Easy, Medium, and Hard across starting health, player speed, fire interval, spawn interval, enemy speed, contact damage, active enemy limits, and bonus spawn pressure.
+- Hard receives additional pressure spawns starting at stage 3, plus a small chance of a third enemy spawn from stage 7. Easy and Medium retain their stage-4 bonus-spawn chance.
+- Preserved the banana pickup (+up to 20 health and an 8-second shield), the original five one-shot sound effects, and the no-music/no-ambience rule.
+- Carries forward the `RRNormalizeVector2` native linker fix and the pinned Ubuntu 24.04 CI/browser workflows.
+- `main.c` is 134 lines, including comments and blank lines.

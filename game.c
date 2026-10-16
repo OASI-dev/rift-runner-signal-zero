@@ -6,9 +6,9 @@
 #include <time.h>
 
 const DifficultyInfo DIFFICULTIES[3] = {
-    { "EASY",   "More room to breathe", { 98, 255, 178, 255 }, 292.0f, 0.245f, 1.16f, 66.0f, 15.0f, 125.0f },
-    { "MEDIUM", "The intended run",     { 76, 231, 255, 255 }, 276.0f, 0.225f, 0.91f, 83.0f, 22.0f, 100.0f },
-    { "HARD",   "No wasted movement",  { 255, 83, 170, 255 }, 266.0f, 0.205f, 0.72f, 103.0f, 30.0f, 90.0f }
+    { "EASY",   "Learn the arena",       { 98, 255, 178, 255 }, 292.0f, 0.245f, 1.02f, 72.0f, 13.0f, 130.0f },
+    { "MEDIUM", "Stay moving",           { 76, 231, 255, 255 }, 276.0f, 0.225f, 0.78f, 95.0f, 25.0f, 100.0f },
+    { "HARD",   "Overwhelming pursuit", { 255, 83, 170, 255 }, 266.0f, 0.205f, 0.58f, 120.0f, 34.0f, 85.0f }
 };
 
 void ResetWorld(void)

@@ -61,7 +61,14 @@ void UpdatePlaying(float dt)
         float scoreRate = 1.0f + (float)(g.stage - 1) * 0.15f;
         float interval = GetDifficulty()->spawnInterval / scoreRate;
         g.spawnClock = MaxF(0.27f, interval) * RandF(0.84f, 1.16f);
-        if (g.stage >= 4 && (rand() % 100) < 18) SpawnEnemy();
+        /* Hard mode adds pressure waves earlier and more often. At later
+           stages, a rare third spawn creates a short survival spike. */
+        if (g.difficulty == DIFF_HARD) {
+            if (g.stage >= 3 && (rand() % 100) < 34) SpawnEnemy();
+            if (g.stage >= 7 && (rand() % 100) < 12) SpawnEnemy();
+        } else if (g.stage >= 4 && (rand() % 100) < 18) {
+            SpawnEnemy();
+        }
     }
 }
 

@@ -1,3 +1,12 @@
+## v0.26.0 — final difficulty rebalance
+
+- Easy: slightly faster enemy arrivals than before, roaming behavior, 130 starting health, and 13 base red-enemy contact damage.
+- Medium: faster arrivals, faster enemies, and 25 base red-enemy contact damage.
+- Hard: 0.58-second base spawn interval, 120 base enemy speed, 34 base red-enemy contact damage, 85 starting health, a higher on-screen enemy cap (48), extra spawns from stage 3, and a rare third spawn from stage 7.
+- Increased simultaneous enemy allowance by difficulty; stage scaling still increases pressure over time.
+- Preserved +20 health / 8-second banana shield, original five sound effects, no music, and the raylib `RRNormalizeVector2` name-collision fix.
+- `main.c`: 134 lines including comments and blank lines.
+
 # Changelog
 
 ## v0.25.2 — fix native Normalize linker collision

@@ -1,34 +1,35 @@
-# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.25.2
+# Release checklist — RIFT RUNNER: SIGNAL ZERO v0.26.0
 
-## Code/package checks
+## Completed local checks
 
-- [x] `main.c` is the commented entry point and main-process outline.
-- [x] Game systems are split into plainly named C files and headers.
-- [x] All game source files pass a local C99 syntax check against a test-only raylib API stub.
+- [x] `main.c` is the commented 134-line entry point and main-process outline.
+- [x] Gameplay systems are split into plainly named C source files and headers.
+- [x] Difficulty settings and spawn-pressure changes are documented in `game.c`, `enemies.c`, and `main.c`.
 - [x] Five original one-shot WAV files are present and validated by `tools/check_assets.py`.
-- [ ] Native CI build passes against real raylib 6.0.
-- [ ] Emscripten build and GitHub Pages deployment pass after pushing this version.
+- [x] Source and update ZIP archives pass ZIP integrity checks.
+- [x] `START-HERE.txt`, README release notes, and this checklist identify v0.26.0 consistently.
 
-## Play-test after deploy
+## Required after pushing to GitHub
 
-- [ ] Title screen difficulty cards respond to keyboard and mouse.
-- [ ] Runner faces its movement/aim direction and auto-fire works.
-- [ ] Red and blue enemy types appear; Easy roams randomly, Medium pursues steadily, and Hard combines pursuit with randomized steering.
-- [ ] Easy, Medium, and Hard have visibly different initial pressure.
-- [ ] Stage pressure increases at score milestones, not only due to elapsed time.
-- [ ] No survival-time, kill, or combo counter is shown; no floating score popups appear.
-- [ ] Leaderboard shows exactly three entries: best Easy, Medium, and Hard scores.
-- [ ] No health kits, repair cells, or data chips spawn.
-- [ ] A new score replaces only its own mode's personal best.
-- [ ] Browser records persist after reload in the same browser/device.
-- [ ] Pause, collision, death, and retry work; no music or background ambience plays; the original one-shot effects play. The banana is the only pickup and restores up to 20 health plus an eight-second shield.
-- [ ] Touch controls are checked on target browsers before claiming full mobile support.
-
-## Release
-
-- [ ] Native CI build succeeds on real raylib.
-- [ ] Browser compile and deployment both succeed.
-- [ ] Test the actual deployed browser game before sharing this version.
+- [ ] Native CI build succeeds against real raylib 6.0.
+- [ ] Emscripten build succeeds and GitHub Pages deployment completes.
+- [ ] Open the deployed game URL and test the actual published browser build.
 - [ ] Test Windows/Linux/macOS release packages before claiming all desktop builds are available.
 
-Test-only stubs verify C API usage and syntax, not a playable game build.
+## Manual gameplay smoke test
+
+- [ ] Title screen difficulty cards respond to keyboard and mouse.
+- [ ] Runner movement, aiming, automatic fire, collisions, pause, death and retry work.
+- [ ] Red and blue enemy types appear; Easy roams, Medium pursues, and Hard combines pursuit with randomized steering.
+- [ ] Easy, Medium, and Hard have visibly different starting pressure and later-stage difficulty.
+- [ ] Stage pressure increases with score thresholds, not only elapsed time.
+- [ ] No survival-time, kill, or combo counter is shown; no floating score popups appear.
+- [ ] Leaderboard shows exactly three entries: best Easy, Medium, and Hard scores.
+- [ ] No health kits, repair cells, or data pickups spawn.
+- [ ] A new score replaces only the personal best for its own mode.
+- [ ] Browser records persist after reload in the same browser/device.
+- [ ] Banana is the only pickup and restores up to 20 health plus an eight-second shield.
+- [ ] Only the original five one-shot sound effects play; no music or ambient loop plays.
+- [ ] Touch controls are tested on target browsers before claiming mobile support.
+
+**Verification boundary:** source review, asset validation, and ZIP integrity are local checks. Test-only syntax stubs do not replace a real raylib compile, a browser deployment, or hands-on play-testing.
