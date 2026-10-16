@@ -53,7 +53,7 @@ typedef struct Game {
     bool newPersonalBest;
     bool audioReady, firstAudioGesture, quitRequested;
     float worldTime, spawnClock, screenShake, flashAlpha, stageNotice;
-    float bananaClock, backgroundTransition, ambientEventClock;
+    float bananaClock, backgroundTransition;
     int backgroundTheme, menuSelection;
     Sound sounds[SFX_COUNT];
 } Game;
@@ -88,7 +88,6 @@ int CurrentStageForScore(int score);
 /* Audio and personal-best storage. */
 void FirstAudioGesture(void);
 void PlaySfx(SoundId id);
-void UpdateAmbientAudio(float dt);
 void SaveBestScores(void);
 void LoadBestScores(void);
 void RecordPersonalBest(void);

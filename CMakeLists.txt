@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.24)
-project(rift_runner_signal_zero VERSION 0.25.0 LANGUAGES C)
+project(rift_runner_signal_zero VERSION 0.25.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# raylib's Web backend uses Emscripten EM_ASM macros. Emscripten intentionally
-# rejects those in strict -std=c99 mode, so use GNU C99 extensions for Web only.
+# Use C99 with compiler extensions enabled for both targets. Emscripten's
+# EM_ASM macros require GNU C mode, and raylib/GLFW desktop dependencies can
+# rely on POSIX/GNU feature definitions. The language standard remains C99.
+set(CMAKE_C_EXTENSIONS ON)
 if(EMSCRIPTEN)
-    set(CMAKE_C_EXTENSIONS ON)
     set(PLATFORM Web CACHE STRING "raylib target platform" FORCE)
-else()
-    set(CMAKE_C_EXTENSIONS OFF)
 endif()
 
 include(FetchContent)
@@ -49,7 +48,7 @@ add_executable(rift_runner
 )
 target_link_libraries(rift_runner PRIVATE raylib)
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(rift_runner PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(rift_runner PRIVATE -Wall -Wextra -Wpedantic -Werror=implicit-function-declaration)
 endif()
 if(EMSCRIPTEN)
     set_property(TARGET rift_runner PROPERTY C_EXTENSIONS ON)

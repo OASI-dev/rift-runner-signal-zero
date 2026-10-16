@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that the packaged audio assets are ordinary PCM RIFF/WAVE sound effects and ambience files."""
+"""Check that the packaged audio assets are the original PCM RIFF/WAVE one-shot sound effects."""
 from pathlib import Path
 import struct
 import sys
@@ -7,15 +7,11 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 ASSET_DIR = ROOT / "assets"
 EXPECTED = (
-    "space_ambience.wav",
-    "rift_shift.wav",
-    "void_whisper.wav",
-    "deep_rumble.wav",
-    "enemy_down.wav",
+    "shot.wav",
     "impact.wav",
     "pickup.wav",
+    "enemy_down.wav",
     "surge.wav",
-    "shot.wav",
 )
 
 def main() -> int:

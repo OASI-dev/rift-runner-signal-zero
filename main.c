@@ -2,6 +2,7 @@
 #include "game.h"
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h> /* rand() is used by the bonus enemy spawn check. */
 #if defined(__EMSCRIPTEN__)
 #include <emscripten.h>
 #endif
@@ -43,7 +44,6 @@ void UpdatePlaying(float dt)
     if (g.score / 1000 != g.backgroundTheme) {
         g.backgroundTheme = g.score / 1000;
         g.backgroundTransition = 0.90f;
-        PlaySfx(SFX_RIFT_SHIFT);
     }
 
     /* 8. Occasionally create a banana pickup somewhere inside the arena. */
@@ -73,9 +73,6 @@ void GameFrame(void)
     if (!isfinite(dt) || dt < 0.0f) dt = 0.0f;
     if (dt > 1.0f / 25.0f) dt = 1.0f / 25.0f;
     g.worldTime += dt;
-
-    /* Maintain non-musical space ambience and occasional distant sound events. */
-    UpdateAmbientAudio(dt);
 
     /* Poll mouse/touch once per frame so every menu uses the same input edge. */
     PollUIPointer();

@@ -21,7 +21,7 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
 - **Pause/resume:** P or Esc during a run. Resume or return to the flight deck with keyboard, mouse, or touch.
 - **One pickup only:** the golden banana restores up to 20 health and grants an 8-second shield. No health kits, repair cells, or data chips spawn.
-- **Sound:** there is no music. After the first user input, a quiet non-musical space ambience loop plays with occasional distant void whispers/deep rumbles, plus a rift-shift sound at each 1,000-point environment change. Shot, impact, pickup, enemy-down and stage-surge sounds are separate effects.
+- **Sound:** no music and no background ambience. Only the original five one-shot effects play: shot, impact, pickup, enemy-down and stage-surge. Background changes are visual only.
 
 ### Touch screens
 
@@ -56,7 +56,7 @@ rift-runner-signal-zero/
 ├── ui.c                   # Menus, HUD and pause/game-over screens
 ├── helpers.c              # Shared math and drawing helpers
 ├── CMakeLists.txt         # raylib build and desktop/browser targets
-├── assets/                # bundled WAV effects and non-musical space ambience
+├── assets/                # five bundled one-shot WAV sound effects
 ├── web/
 │   ├── index.html         # public browser landing page
 │   └── idbfs-pre.js       # browser-persistent local score storage
@@ -100,4 +100,11 @@ The code is split by responsibility so the main process is easy to follow:
 - `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
 - `helpers.c` — shared math and drawing helpers.
 
-Start with `main.c` to understand the game flow. It is **130 lines** in v0.25.0; open the named system file for the implementation of any one part.
+Start with `main.c` to understand the game flow. It is **127 lines** in v0.25.1; open the named system file for the implementation of any one part.
+
+
+## v0.25.1 — audio rollback and native CI reliability
+
+- Removed the added space ambience loop, distant whispers/rumble, and rift-change sound. There is still no music; the original five one-shot sound effects remain.
+- Pinned Linux CI and browser workflow runners to Ubuntu 24.04 for a stable CMake/dependency environment.
+- Enabled GNU C99 extensions consistently for raylib's native and browser targets while retaining C99 as the language standard.

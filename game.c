@@ -40,7 +40,6 @@ void ResetWorld(void)
 void StartRun(void)
 {
     FirstAudioGesture();
-    g.ambientEventClock = RandF(12.0f, 24.0f);
     ResetWorld();
     g.state = STATE_PLAYING;
     Burst(g.player.pos, C_CYAN, 34, 190.0f, 3.3f);

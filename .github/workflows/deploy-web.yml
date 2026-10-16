@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build-web:
     name: Compile web game
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out source
         uses: actions/checkout@v6
@@ -50,7 +50,7 @@ jobs:
 
   deploy:
     name: Publish public play link
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-web
     environment:
       name: github-pages

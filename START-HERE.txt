@@ -1,19 +1,7 @@
-RIFT RUNNER: SIGNAL ZERO — v0.25.0 gameplay and sound update
+RIFT RUNNER: SIGNAL ZERO — v0.25.1 audio rollback and native CI stabilization
 
-To update your existing GitHub repository without losing its history:
-1. Extract this update ZIP.
-2. Open project-files and copy its contents into your existing local repository root, replacing matching files. Do not delete your .git folder.
-3. Keep assets/, web/, .github/, and tools/. Merge the folders; do not paste the project-files folder itself as a new nested directory.
-4. Delete assets/ambient_loop.wav from your local repository if it remains from v0.24.0. This release has no music, and CMake otherwise preloads any leftover asset into the Web package.
-5. Commit with summary: Tune difficulty AI, banana power and space ambience.
-6. Push origin.
-7. Check the latest Build and publish browser game run in GitHub Actions. The Native build check is separate from the browser deployment.
+Recommended for an existing repository: use the v0.25.1 UPDATE ZIP. Copy the contents of project-files into your local repository folder, replacing matching files. Keep the .git folder.
 
-Start reading at main.c. It contains the commented main process and is 130 lines long in this release. Detailed systems live in plainly named files such as player.c, enemies.c, background.c, colors.c, audio.c, leaderboard.c, and ui.c.
+The original five one-shot sound effects remain. Added background ambience/whisper/rumble/rift-transition sounds are removed. There is no music. Easy/Medium/Hard AI and banana +20 health/+8 seconds shield are unchanged.
 
-This update removes combo tracking/bonuses, kill counters, floating +points popups, health-kit/repair pickups, and data-chip pickups. The banana is the only pickup: it restores up to 20 health and grants an 8-second shield. Defeated enemies award a fixed 200 score. The previous alien designs and five procedural space environments remain unchanged.
-
-The C syntax checks use test-only API stubs; they do not replace the real GitHub build or a live gameplay test.
-
-Public Pages URL after successful deployment:
-https://oasi-dev.github.io/rift-runner-signal-zero/
+After commit and push, verify both workflows on GitHub Actions. Native build has not been confirmed against real raylib in this environment because fetching raylib timed out.

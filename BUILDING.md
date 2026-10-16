@@ -53,3 +53,8 @@ Push a version tag that begins with `v`, for example `v0.17.1`, only after the n
 ## Browser score persistence
 
 The browser pre-run script mounts `/persist` using Emscripten IDBFS, then syncs the filesystem to IndexedDB. The C game writes exactly three personal-best scores to `/persist/rift_runner_bests.txt` in the browser and `rift_runner_bests.txt` on desktop. Records remain local to the browser/device.
+
+
+## CI reproducibility
+
+The project workflows pin Linux jobs to `ubuntu-24.04` instead of relying on the moving `ubuntu-latest` label. CMake keeps C99 as the standard and enables GNU extensions for both targets to help raylib/GLFW compile consistently. A local source syntax check is not a substitute for the GitHub native build against the actual raylib dependency.

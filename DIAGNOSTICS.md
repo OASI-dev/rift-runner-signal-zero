@@ -23,3 +23,8 @@ The browser uses Emscripten IDBFS at `/persist`. Check that `web/idbfs-pre.js` i
 ## Desktop build fails to open a window
 
 This project uses raylib, which needs the graphics/audio development dependencies for the operating system. CI's native build workflow shows the compiler output; it does not prove that a GUI/audio session has been play-tested.
+
+
+## Native CI uses a pinned Linux environment
+
+The native CI and browser workflows pin their Linux runner to `ubuntu-24.04` so the CMake toolchain and desktop dependency packages do not change when the moving `ubuntu-latest` label migrates. The project uses C99 with GNU extensions enabled for raylib's native and browser targets. If native CI still fails, open the failed run and read whether the failure is during dependency installation, CMake configure, compilation/linking, or audio asset validation; those are distinct issues.

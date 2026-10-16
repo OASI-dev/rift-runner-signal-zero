@@ -1,11 +1,11 @@
-# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.25.0
+# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.25.1
 
 ## Code/package checks
 
 - [x] `main.c` is the commented entry point and main-process outline.
 - [x] Game systems are split into plainly named C files and headers.
 - [x] All game source files pass a local C99 syntax check against a test-only raylib API stub.
-- [x] Nine bundled WAV files are present and validated by `tools/check_assets.py`.
+- [x] Five original one-shot WAV files are present and validated by `tools/check_assets.py`.
 - [ ] Native CI build passes against real raylib 6.0.
 - [ ] Emscripten build and GitHub Pages deployment pass after pushing this version.
 
@@ -21,7 +21,7 @@
 - [ ] No health kits, repair cells, or data chips spawn.
 - [ ] A new score replaces only its own mode's personal best.
 - [ ] Browser records persist after reload in the same browser/device.
-- [ ] Pause, collision, death, and retry work; no music plays; space ambience and environmental sound effects play. The banana is the only pickup and restores up to 20 health plus an eight-second shield.
+- [ ] Pause, collision, death, and retry work; no music or background ambience plays; the original one-shot effects play. The banana is the only pickup and restores up to 20 health plus an eight-second shield.
 - [ ] Touch controls are checked on target browsers before claiming full mobile support.
 
 ## Release

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.25.1 — restore original sound effects and stabilize CI
+
+- Removed the added background ambience, whisper/rumble accents, and rift-transition sound. The game has no music and uses only its original five one-shot effects.
+- Pinned Linux CI and browser workflow jobs to Ubuntu 24.04 rather than a moving `ubuntu-latest` image.
+- Added the missing `<stdlib.h>` include for `rand()` in `main.c`; the compiler now treats undeclared function calls as errors. GNU C99 extensions are enabled consistently for native and web targets.
+
+
 ## v0.25.0 — difficulty behavior, banana tuning, and soundscape
 
 - Easy enemies roam with randomized steering; Medium enemies aim for the player without random drift; Hard enemies combine pursuit and randomized steering.
