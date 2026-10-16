@@ -1,6 +1,6 @@
 # RIFT RUNNER: SIGNAL ZERO
 
-**A score-first neon survival shooter written in C and raylib.** The gameplay code lives in one file: [`main.c`](main.c). The CMake file, browser launcher, workflows, and audio assets stay separate because they build, package, and publish the game rather than implement its gameplay.
+**A score-first neon survival shooter written in C and raylib.** Start with [`main.c`](main.c) to follow the main game process. Player movement, enemies, backgrounds, colors, sound, score storage, and menus are implemented in separate, plainly named files so each part is easier to understand and change.
 
 ## Play in your browser
 
@@ -14,18 +14,18 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 
 - **Character movement:** WASD or arrow keys. The armored runner faces the latest movement direction.
 - **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
-- **Phase dash:** Space or either Shift key; briefly grants invulnerability.
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
-- **Red enemies only:** the hard-to-see small/purple/pink enemy types are removed. Red enemies are larger and brighter; they roam in changing random directions and bounce around the arena instead of homing in on the player.
-- **Score-driven stages:** the next Rift Stage starts at each 500-point milestone. Spawn pressure and enemy speed increase based on score stage, not simply because time elapsed.
+- **Two enemy types:** red enemies are larger and more dangerous; smaller blue enemies deal less contact damage. Easy enemies roam randomly, Medium enemies gently pursue, and Hard enemies pursue more strongly.
+- **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The background changes theme every 1,000 score with a radial rift-burst transition.
 - **Score is the objective:** no survival-time counter is displayed. Kills, combos, and pickups grant points.
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
 - **Pause/resume:** P or Esc during a run, then P/Enter/Esc to resume.
-- **Sound:** all music and effects are always on after you start a run. There is no sound toggle.
+- **Banana pickup:** collect a banana to restore some health and gain a 5-second shield.
+- **Sound:** music and effects are initialized after you start a run. There is no sound toggle.
 
 ### Touch screens
 
-The browser build includes basic touch movement and aiming. Use the left side to move, the right side to aim, and the lower-right dash area to phase dash. Keyboard/mouse controls on desktop are the primary supported experience; test specific mobile browsers before advertising universal device support.
+The browser build includes basic touch movement and aiming. Use the left side to move and the right side to aim. Keyboard/mouse controls on desktop are the primary supported experience; test specific mobile browsers before advertising universal device support.
 
 ## Build a desktop version
 
@@ -37,7 +37,20 @@ For developers building from source, see [BUILDING.md](BUILDING.md).
 
 ```text
 rift-runner-signal-zero/
-├── main.c                 # Entire C game: gameplay, drawing, audio, scores, menus
+├── main.c                 # Main game flow and frame loop (commented and readable)
+├── game.c / game.h        # Game state, difficulty and shared declarations
+├── player.c / player.h    # Player movement, aiming and character drawing
+├── enemies.c / enemy.h    # Enemy spawning, movement, damage and rendering
+├── bullets.c / bullets.h  # Blaster projectiles and hit detection
+├── pickups.c / pickups.h  # Data, repair and banana pickups
+├── background.c           # Animated background themes and rift bursts
+├── colors.c / colors.h    # Shared palette
+├── audio.c / audio.h      # Sound initialization and playback
+├── leaderboard.c          # Three personal-best records
+├── effects.c              # Particles and floating score feedback
+├── world.c                # Gameplay object draw order
+├── ui.c                   # Menus, HUD and pause/game-over screens
+├── helpers.c              # Shared math and drawing helpers
 ├── CMakeLists.txt         # raylib build and desktop/browser targets
 ├── assets/                # bundled WAV sound effects and ambient loop
 ├── web/
@@ -53,3 +66,34 @@ The three personal bests are stored locally as three integers, one per difficult
 ## License
 
 The project source and bundled original game assets are distributed under the repository's [LICENSE](LICENSE). raylib is a separate third-party dependency with its own license.
+
+
+## v0.20.0 gameplay changes
+
+- Removed Phase Dash completely.
+- Easy enemies roam randomly; Medium enemies gently steer toward the runner; Hard enemies pursue more strongly.
+- Added smaller blue enemies (lower health and contact damage) alongside red enemies.
+- The background palette changes every 1,000 score with a radial rift-burst transition.
+- Bananas appear periodically; collecting one restores a little health and grants a 5-second shield.
+
+## Source code layout
+
+The code is split by responsibility so the main process is easy to follow:
+
+- `main.c` — application entry point, frame loop, and the commented order of gameplay systems.
+- `game.c` — start/reset/end a run and difficulty settings.
+- `game.h` — shared game state and declarations used between systems.
+- `player.c` / `player.h` — player movement, aiming, shield display and character drawing.
+- `enemies.c` / `enemy.h` — enemy spawning, movement/AI, damage, rewards and drawing.
+- `bullets.c` / `bullets.h` — blaster shots and collision checks.
+- `pickups.c` / `pickups.h` — data, repair and banana pickups.
+- `background.c` / `background.h` — animated arena backgrounds and visual theme effects.
+- `colors.c` / `colors.h` — shared color palette.
+- `audio.c` / `audio.h` — audio initialization and sound playback.
+- `leaderboard.c` — load/save the three personal-best scores.
+- `effects.c` — particles and floating score text.
+- `world.c` — draws the active gameplay objects in layers.
+- `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
+- `helpers.c` — shared math and drawing helpers.
+
+Start with `main.c` to understand the game flow. It is **133 lines**; open the named system file for the implementation of any one part.

@@ -1,6 +1,6 @@
 # Building RIFT RUNNER: SIGNAL ZERO
 
-The game code is in one C file (`main.c`). CMake and raylib are still used to turn that source into a native executable or a browser/WebAssembly build.
+The game is organized into small C modules. Start with `main.c` for the commented frame loop and game-process outline. CMake compiles the modules together with raylib into a native executable or a browser/WebAssembly build.
 
 ## Browser release (recommended for sharing a link)
 
@@ -48,8 +48,8 @@ cmake --build build --parallel
 
 ## Desktop release ZIPs
 
-Push a version tag that begins with `v`, for example `v0.17.0`, only after the native build and browser deployment are passing. The `Tagged desktop release` workflow is configured to build Windows, Linux, and macOS ZIPs and publish them as a GitHub Release. Do not create a release tag until the current build has been verified.
+Push a version tag that begins with `v`, for example `v0.17.1`, only after the native build and browser deployment are passing. The `Tagged desktop release` workflow is configured to build Windows, Linux, and macOS ZIPs and publish them as a GitHub Release. Do not create a release tag until the current build has been verified.
 
 ## Browser score persistence
 
-The browser pre-run script mounts `/persist` using Emscripten IDBFS, then syncs the filesystem to IndexedDB. The C game writes `rift_runner_scores.txt` below `/persist`; desktop builds write that file in the working directory. The scoreboard retains all saved completed runs sorted by score and is intentionally local to that browser/device.
+The browser pre-run script mounts `/persist` using Emscripten IDBFS, then syncs the filesystem to IndexedDB. The C game writes exactly three personal-best scores to `/persist/rift_runner_bests.txt` in the browser and `rift_runner_bests.txt` on desktop. Records remain local to the browser/device.

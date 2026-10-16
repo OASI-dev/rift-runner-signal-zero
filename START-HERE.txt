@@ -1,0 +1,15 @@
+RIFT RUNNER: SIGNAL ZERO — v0.21.0 modular-source update
+
+To update an existing GitHub repository without losing its history:
+1. Extract this update ZIP.
+2. Open project-files and copy its contents into your existing local repository root, replacing matching files. Remove the old unused assets/dash.wav file if it is still present.
+3. Keep the .git folder and all repository history. Merge included folders as needed; do not remove assets/, web/, .github/, or tools/.
+4. Commit with summary: Split game systems into readable source files
+5. Push origin.
+6. Check Native build check and Build and publish browser game in GitHub Actions.
+
+Start reading at main.c. It contains the commented main process and is 133 lines long. Detailed systems are in plainly named files such as player.c, enemies.c, background.c, colors.c, audio.c, and leaderboard.c.
+
+The real raylib build and live browser play-test must pass after pushing before sharing the updated version.
+
+Public Pages URL after a successful deploy: https://oasi-dev.github.io/rift-runner-signal-zero/

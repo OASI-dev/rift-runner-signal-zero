@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(rift_runner_signal_zero VERSION 0.19.0 LANGUAGES C)
+project(rift_runner_signal_zero VERSION 0.21.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -31,7 +31,22 @@ if(EMSCRIPTEN)
     target_compile_options(raylib PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu99>)
 endif()
 
-add_executable(rift_runner main.c)
+add_executable(rift_runner
+    main.c
+    game.c
+    helpers.c
+    colors.c
+    background.c
+    player.c
+    enemies.c
+    bullets.c
+    pickups.c
+    effects.c
+    world.c
+    audio.c
+    leaderboard.c
+    ui.c
+)
 target_link_libraries(rift_runner PRIVATE raylib)
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(rift_runner PRIVATE -Wall -Wextra -Wpedantic)

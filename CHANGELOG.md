@@ -1,12 +1,17 @@
 # Changelog
 
+## v0.21.0 — multi-file source organization
+- Reorganized gameplay into focused, plainly named C modules and headers.
+- Kept `main.c` as the commented game-flow outline and frame-loop entry point.
+- Updated CMake to compile all modules together.
+
 ## v0.19.0 — Three-score leaderboard and simpler score code
 
 - Replaced the unlimited run history with exactly three saved personal bests: Easy, Medium, and Hard.
 - The leaderboard always shows one score per difficulty; a record updates only when a run beats that mode's previous best.
 - Removed dynamic score-history allocation, sorting, scrolling, and old history fields.
 - Removed unused player/enemy fields and labels that no longer matched the leaderboard.
-- Preserved the player, firing, dash, red roaming enemies, pickups, effects, score milestones, audio, and neon presentation.
+- Preserved the player, firing, enemy behavior, pickups, effects, score milestones, audio, and neon presentation.
 - `main.c` is now 1,149 physical lines, down from 1,273 in v0.18.0 (124 fewer lines, about 9.7%).
 
 ## v0.18.0 — Clearer, simpler enemy behavior
@@ -31,3 +36,11 @@
 - Removed the survival-time counter and made score the primary objective.
 - Added local score history.
 - Added basic touch movement/aim support in the browser build.
+
+
+## v0.20.0
+- Removed Phase Dash and its HUD/touch prompts.
+- Added blue enemies and animated type-specific glows.
+- Medium and Hard enemies steer toward the player; Easy remains random roaming.
+- Added a five-theme background cycle with a radial burst every 1,000 score.
+- Added periodic banana pickups that restore health and grant five seconds of protection.

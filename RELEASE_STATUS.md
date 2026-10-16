@@ -1,13 +1,13 @@
-# Release status — v0.19.0 candidate
+# Release status — RIFT RUNNER: SIGNAL ZERO v0.21.0
 
-The personal leaderboard now contains exactly three local records: one highest score for Easy, one for Medium, and one for Hard. The old unbounded run history, sorting, allocation, and scrolling code have been removed. All gameplay remains in root-level `main.c`.
+## Current source layout
+- `main.c` owns the application entry point, frame scheduling, and commented main gameplay process.
+- Detailed implementation is split into named modules: player, enemies, bullets, pickups, background, colors, audio, leaderboard, effects, world rendering, UI and common helpers.
+- The three local records remain Easy, Medium and Hard best scores.
 
-Validation performed for this package:
+## Local checks
+- C source syntax was checked with GCC in C99 mode against a temporary test-only raylib API stub. This checks C syntax and cross-file declarations only; it is not a replacement for building against real raylib.
+- The native raylib build, Emscripten build, GitHub Pages deploy, and actual gameplay still need verification after pushing this update.
 
-- `main.c` passed strict C99 native-mode syntax validation against a test-only raylib API stub with warnings treated as errors.
-- `main.c` passed GNU C99 Emscripten-conditional syntax validation against test-only raylib/Emscripten API stubs with warnings treated as errors.
-- A focused save/load smoke test confirmed that Easy, Medium, and Hard each keep their own best score, lower runs do not replace a record, and the three values reload correctly.
-- The source was checked to confirm the old dynamic-history fields/functions are removed.
-- The seven bundled WAV assets remain present and are validated separately by `tools/check_assets.py`.
-
-These are source-level checks, not a real raylib/Emscripten link or gameplay session. The native build, browser build/deployment, persistence across reload, and live gameplay still need to pass GitHub Actions and manual play-testing.
+## Browser URL after successful deployment
+https://oasi-dev.github.io/rift-runner-signal-zero/

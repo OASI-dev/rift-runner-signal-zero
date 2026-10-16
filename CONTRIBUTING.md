@@ -4,7 +4,7 @@ Thanks for helping with RIFT RUNNER: SIGNAL ZERO.
 
 ## Source layout
 
-- Keep all gameplay, rendering, audio calls, and score handling in root-level `main.c` so the code stays approachable.
+- Keep `main.c` as a commented outline of the main process. Put detailed implementations in the matching, plainly named system files (for example, `player.c`, `enemies.c`, `background.c`, `audio.c`, and `leaderboard.c`).
 - Keep build/deployment instructions, browser hosting glue, workflows, and bundled WAV assets in their own files.
 - Do not vendor raylib source into the repository; CMake fetches raylib 6.0 for builds.
 - Avoid survival-time scoring UI. Rift Stage pressure must progress from score milestones.

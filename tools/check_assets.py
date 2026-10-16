@@ -8,7 +8,6 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSET_DIR = ROOT / "assets"
 EXPECTED = (
     "ambient_loop.wav",
-    "dash.wav",
     "enemy_down.wav",
     "impact.wav",
     "pickup.wav",
