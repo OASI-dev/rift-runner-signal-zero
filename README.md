@@ -15,13 +15,13 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Character movement:** WASD or arrow keys. The armored runner faces the latest movement direction.
 - **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
-- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies gently pursue, and Hard enemies pursue more strongly.
+- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies steadily pursue the player, and Hard enemies combine pursuit with randomized steering.
 - **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The entire space environment changes every 1,000 score: ringed worlds, asteroid graveyards, dimensional rifts, a cratered blood moon, and a void cathedral. A named-sector HUD and progress bar show when the next environment shift is coming. Transitions use a soft fade-and-scan, not an exploding radial burst.
 - **Score is the objective:** no kill counter, combo counter, floating point popups, or survival-time counter. Each alien grants a fixed score.
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
 - **Pause/resume:** P or Esc during a run. Resume or return to the flight deck with keyboard, mouse, or touch.
-- **One pickup only:** the golden banana restores up to 18 health and grants a 5-second shield. No health kits, repair cells, or data chips spawn.
-- **Sound:** music and effects are initialized after you start a run. There is no sound toggle.
+- **One pickup only:** the golden banana restores up to 20 health and grants an 8-second shield. No health kits, repair cells, or data chips spawn.
+- **Sound:** there is no music. After the first user input, a quiet non-musical space ambience loop plays with occasional distant void whispers/deep rumbles, plus a rift-shift sound at each 1,000-point environment change. Shot, impact, pickup, enemy-down and stage-surge sounds are separate effects.
 
 ### Touch screens
 
@@ -56,7 +56,7 @@ rift-runner-signal-zero/
 ├── ui.c                   # Menus, HUD and pause/game-over screens
 ├── helpers.c              # Shared math and drawing helpers
 ├── CMakeLists.txt         # raylib build and desktop/browser targets
-├── assets/                # bundled WAV sound effects and ambient loop
+├── assets/                # bundled WAV effects and non-musical space ambience
 ├── web/
 │   ├── index.html         # public browser landing page
 │   └── idbfs-pre.js       # browser-persistent local score storage
@@ -78,7 +78,7 @@ The project source and bundled original game assets are distributed under the re
 - Easy enemies roam randomly; Medium enemies gently steer toward the runner; Hard enemies pursue more strongly.
 - Added smaller blue enemies (lower health and contact damage) alongside red enemies.
 - The full background environment changes every 1,000 score with a soft fade transition; there is no radial explosion effect.
-- Bananas appear periodically; collecting one restores a little health and grants a 5-second shield.
+- Bananas appear periodically; collecting one restores up to 20 health and grants an 8-second shield.
 
 ## Source code layout
 
@@ -100,4 +100,4 @@ The code is split by responsibility so the main process is easy to follow:
 - `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
 - `helpers.c` — shared math and drawing helpers.
 
-Start with `main.c` to understand the game flow. It is **133 lines**; open the named system file for the implementation of any one part.
+Start with `main.c` to understand the game flow. It is **130 lines** in v0.25.0; open the named system file for the implementation of any one part.

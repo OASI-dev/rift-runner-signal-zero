@@ -8,3 +8,5 @@ When applying the update to an existing repository:
 - Keep assets/, web/, .github/, and tools/.
 - Delete assets/dash.wav if it remains from an earlier version; the dash mechanic and its sound are no longer used.
 - If an old src/ or tests/ folder exists from an earlier version, do not use those stale C sources in the build; CMake should build the root-level modules listed in CMakeLists.txt.
+
+- Delete assets/ambient_loop.wav if it remains; v0.25.0 has no music and uses space_ambience.wav plus short environmental effects.

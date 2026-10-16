@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(rift_runner_signal_zero VERSION 0.23.0 LANGUAGES C)
+project(rift_runner_signal_zero VERSION 0.25.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)

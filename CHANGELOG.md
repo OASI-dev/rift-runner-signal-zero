@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.25.0 — difficulty behavior, banana tuning, and soundscape
+
+- Easy enemies roam with randomized steering; Medium enemies aim for the player without random drift; Hard enemies combine pursuit and randomized steering.
+- The banana restores up to 20 health and grants an 8-second shield.
+- Removed the music stream entirely. Added a quiet, non-musical space ambience loop, rare deep-rumble/void-whisper accents, and a rift-shift effect on each 1,000-point environment transition.
+- Updated the asset validation and documentation for the new WAV files and version metadata.
+
 ## v0.24.0 — distraction cleanup
 
 - Removed combo tracking, combo score bonuses, the combo HUD, kill counters, and floating point popups.

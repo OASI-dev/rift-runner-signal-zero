@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include <stdbool.h>
 
-/* The banana is the only pickup: it restores health and grants a 5-second shield. */
+/* The banana is the only pickup: it restores up to 20 health and grants an 8-second shield. */
 typedef struct Pickup {
     bool active;
     Vector2 pos;

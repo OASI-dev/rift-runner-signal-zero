@@ -28,8 +28,8 @@ void UpdatePickups(float dt)
         const float collectRadius = 18.0f;
         if (DistSq(p->pos, g.player.pos) <= collectRadius * collectRadius) {
             p->active = false;
-            g.player.health = MinF(g.player.maxHealth, g.player.health + 18.0f);
-            g.player.shieldTime = 5.0f;
+            g.player.health = MinF(g.player.maxHealth, g.player.health + 20.0f);
+            g.player.shieldTime = 8.0f;
             Burst(p->pos, C_GOLD, 14, 120.0f, 2.1f);
             PlaySfx(SFX_PICKUP);
         }

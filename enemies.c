@@ -69,14 +69,23 @@ void UpdateEnemies(float dt)
             e->turnRate = RandF(-0.9f, 0.9f);
             e->turnClock = RandF(0.55f, 1.25f);
         }
-        if (g.difficulty != DIFF_EASY) {
+        if (g.difficulty == DIFF_EASY) {
+            /* EASY: pure roaming. Random steering changes keep enemies unpredictable. */
+            e->heading += e->turnRate * dt * 1.35f;
+        } else {
             Vector2 toPlayer = Normalize(Sub(g.player.pos, e->pos));
-            float attraction = (g.difficulty == DIFF_MEDIUM) ? 0.34f : 0.68f;
             float desired = atan2f(toPlayer.y, toPlayer.x);
             float delta = atan2f(sinf(desired - e->heading), cosf(desired - e->heading));
-            e->heading += ClampF(delta, -attraction * dt, attraction * dt);
+
+            if (g.difficulty == DIFF_MEDIUM) {
+                /* MEDIUM: steady pursuit, without the random steering drift. */
+                e->heading += ClampF(delta, -0.52f * dt, 0.52f * dt);
+            } else {
+                /* HARD: pursuit plus stronger random drift for mixed behavior. */
+                e->heading += ClampF(delta, -0.68f * dt, 0.68f * dt);
+                e->heading += e->turnRate * dt * 1.50f;
+            }
         }
-        e->heading += e->turnRate * dt;
         float stageFactor = 1.0f + MinF((float)(g.stage - 1) * 0.028f, 0.48f);
         e->vel = Scale(V2(cosf(e->heading), sinf(e->heading)), e->speed * stageFactor);
         e->pos = Add(e->pos, Scale(e->vel, dt));

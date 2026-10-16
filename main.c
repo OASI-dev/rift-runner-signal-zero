@@ -2,7 +2,6 @@
 #include "game.h"
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
 #if defined(__EMSCRIPTEN__)
 #include <emscripten.h>
 #endif
@@ -34,16 +33,17 @@ void UpdatePlaying(float dt)
     UpdateEnemies(dt);
     if (g.state != STATE_PLAYING) return;
 
-    /* 5. Pickups: the banana restores health and grants a 5-second shield. */
+    /* 5. Pickups: the banana restores health and grants an 8-second shield. */
     UpdatePickups(dt);
 
     /* 6. Temporary effects: hit particles, screen shake and transition flashes. */
     UpdateEffects(dt);
 
-    /* 7. Change to a new space environment every 1,000 score. */
+    /* 7. Change to a new space environment every 1,000 score, with a rift sound. */
     if (g.score / 1000 != g.backgroundTheme) {
         g.backgroundTheme = g.score / 1000;
         g.backgroundTransition = 0.90f;
+        PlaySfx(SFX_RIFT_SHIFT);
     }
 
     /* 8. Occasionally create a banana pickup somewhere inside the arena. */
@@ -74,11 +74,8 @@ void GameFrame(void)
     if (dt > 1.0f / 25.0f) dt = 1.0f / 25.0f;
     g.worldTime += dt;
 
-    /* Keep streaming music updated after the player has started audio. */
-    if (g.audioReady && g.musicLoaded && g.firstAudioGesture) {
-        UpdateMusicStream(g.ambient);
-        if (!IsMusicStreamPlaying(g.ambient)) PlayMusicStream(g.ambient);
-    }
+    /* Maintain non-musical space ambience and occasional distant sound events. */
+    UpdateAmbientAudio(dt);
 
     /* Poll mouse/touch once per frame so every menu uses the same input edge. */
     PollUIPointer();
