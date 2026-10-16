@@ -15,17 +15,21 @@ The workflow publishes the WebAssembly build from this repository. If the most r
 - **Character movement:** WASD or arrow keys. The armored runner faces the latest movement direction.
 - **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
 - **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
-- **Two enemy types:** red enemies are larger and more dangerous; smaller blue enemies deal less contact damage. Easy enemies roam randomly, Medium enemies gently pursue, and Hard enemies pursue more strongly.
-- **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The background changes theme every 1,000 score with a radial rift-burst transition.
+- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies gently pursue, and Hard enemies pursue more strongly.
+- **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The entire space environment changes every 1,000 score: ringed worlds, asteroid graveyards, dimensional rifts, a cratered blood moon, and a void cathedral. A named-sector HUD and progress bar show when the next environment shift is coming. Transitions use a soft fade-and-scan, not an exploding radial burst.
 - **Score is the objective:** no survival-time counter is displayed. Kills, combos, and pickups grant points.
 - **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
-- **Pause/resume:** P or Esc during a run, then P/Enter/Esc to resume.
-- **Banana pickup:** collect a banana to restore some health and gain a 5-second shield.
+- **Pause/resume:** P or Esc during a run. Resume or return to the flight deck with keyboard, mouse, or touch.
+- **Pickups:** distinct visuals identify the banana (health plus 5-second shield), repair cell, and data chip.
 - **Sound:** music and effects are initialized after you start a run. There is no sound toggle.
 
 ### Touch screens
 
-The browser build includes basic touch movement and aiming. Use the left side to move and the right side to aim. Keyboard/mouse controls on desktop are the primary supported experience; test specific mobile browsers before advertising universal device support.
+The browser build includes touch movement and aiming. Drag on the left side to move and touch on the right side to aim; the two controls work independently. Menus and pause navigation also support mouse/touch. Keyboard/mouse controls remain the primary desktop experience, and specific mobile browsers should still be tested.
+
+## Release verification
+
+A successful source package is not the same as a verified game build. After pushing updates, check both GitHub Actions workflows—**Native build check** and **Build and publish browser game**—then open the deployed Pages link and test movement, aiming, pause/resume, pickups, score saving, and the 1,000-point environment transition.
 
 ## Build a desktop version
 
@@ -43,7 +47,7 @@ rift-runner-signal-zero/
 ├── enemies.c / enemy.h    # Enemy spawning, movement, damage and rendering
 ├── bullets.c / bullets.h  # Blaster projectiles and hit detection
 ├── pickups.c / pickups.h  # Data, repair and banana pickups
-├── background.c           # Animated background themes and rift bursts
+├── background.c / background.h # Distinct procedural space environments and fade transitions
 ├── colors.c / colors.h    # Shared palette
 ├── audio.c / audio.h      # Sound initialization and playback
 ├── leaderboard.c          # Three personal-best records
@@ -73,7 +77,7 @@ The project source and bundled original game assets are distributed under the re
 - Removed Phase Dash completely.
 - Easy enemies roam randomly; Medium enemies gently steer toward the runner; Hard enemies pursue more strongly.
 - Added smaller blue enemies (lower health and contact damage) alongside red enemies.
-- The background palette changes every 1,000 score with a radial rift-burst transition.
+- The full background environment changes every 1,000 score with a soft fade transition; there is no radial explosion effect.
 - Bananas appear periodically; collecting one restores a little health and grants a 5-second shield.
 
 ## Source code layout
@@ -87,7 +91,7 @@ The code is split by responsibility so the main process is easy to follow:
 - `enemies.c` / `enemy.h` — enemy spawning, movement/AI, damage, rewards and drawing.
 - `bullets.c` / `bullets.h` — blaster shots and collision checks.
 - `pickups.c` / `pickups.h` — data, repair and banana pickups.
-- `background.c` / `background.h` — animated arena backgrounds and visual theme effects.
+- `background.c` / `background.h` — five procedural space environments with fade transitions.
 - `colors.c` / `colors.h` — shared color palette.
 - `audio.c` / `audio.h` — audio initialization and sound playback.
 - `leaderboard.c` — load/save the three personal-best scores.

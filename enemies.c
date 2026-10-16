@@ -56,10 +56,9 @@ void KillEnemy(Enemy *e)
     else if ((rand() % 100) < 9) AddPickup(e->pos, PICKUP_REPAIR);
     g.stage = CurrentStageForScore(g.score);
     if (g.stage > oldStage) {
+        /* Stage changes are announced cleanly; no burst is emitted at the player. */
         g.stageNotice = 2.0f;
-        g.flashAlpha = 0.15f;
         PlaySfx(SFX_SURGE);
-        Burst(g.player.pos, C_GOLD, 24, 170.0f, 2.9f);
     }
 }
 
@@ -111,19 +110,158 @@ void UpdateEnemies(float dt)
     }
 }
 
+static Color EnemyFade(Color c, float opacity)
+{
+    c.a = (unsigned char)(ClampF(opacity, 0.0f, 1.0f) * (float)c.a);
+    return c;
+}
+
+/* Convert an enemy-local point (forward, sideways) into arena coordinates. */
+static Vector2 EnemyPoint(const Enemy *e, float forward, float sideways)
+{
+    float c = cosf(e->heading), s = sinf(e->heading);
+    return V2(e->pos.x + forward * c - sideways * s,
+              e->pos.y + forward * s + sideways * c);
+}
+
+/* Tendrils are drawn as bent, tapered-looking segments so the silhouette feels
+   organic instead of like a glowing ball. The movement is purely cosmetic. */
+static void DrawTendril(const Enemy *e, int index, float side, float length, Color shade, Color glint)
+{
+    float r = e->radius;
+    float sway = sinf(g.worldTime * (e->blue ? 4.7f : 3.1f) + (float)index * 1.4f + e->pos.x * 0.01f);
+    float rootX = -r * (0.18f + 0.16f * (float)(index % 3));
+    float rootY = side * r * (0.24f + 0.11f * (float)(index % 2));
+    float reachX = rootX - length * (0.55f + 0.08f * (float)(index % 2));
+    float reachY = side * (r * (0.95f + 0.19f * (float)(index % 3)) + sway * r * 0.18f);
+    Vector2 a = EnemyPoint(e, rootX, rootY);
+    Vector2 b = EnemyPoint(e, rootX - length * 0.22f, rootY + side * length * 0.50f + sway * r * 0.10f);
+    Vector2 c = EnemyPoint(e, reachX, reachY);
+    DrawLineEx(a, b, e->blue ? 3.1f : 4.6f, shade);
+    DrawLineEx(b, c, e->blue ? 1.8f : 2.7f, shade);
+    DrawLineEx(b, c, 0.8f, EnemyFade(glint, 0.72f));
+    DrawCircleV(c, e->blue ? 1.7f : 2.2f, glint);
+}
+
+static void DrawAlienEye(Vector2 p, float radius, Color glow, Color pupil)
+{
+    DrawCircleGradient(p, radius * 3.8f, EnemyFade(glow, 0.40f), EnemyFade(glow, 0.0f));
+    DrawCircleV(p, radius, glow);
+    DrawCircleV(V2(p.x + radius * 0.18f, p.y), radius * 0.48f, pupil);
+    DrawCircleV(V2(p.x + radius * 0.25f, p.y - radius * 0.10f), radius * 0.16f, C_TEXT);
+}
+
+static void DrawRedWraith(const Enemy *e, float r, Color body, Color glow)
+{
+    /* Six animated hooked tendrils hang behind a many-pointed armored shell. */
+    for (int i = 0; i < 3; ++i) {
+        DrawTendril(e, i, -1.0f, r * (0.88f + 0.14f * (float)i), (Color){ 34, 11, 34, 255 }, glow);
+        DrawTendril(e, i + 3, 1.0f, r * (0.88f + 0.14f * (float)i), (Color){ 34, 11, 34, 255 }, glow);
+    }
+
+    /* Bone-like dorsal spikes and side blades frame the silhouette. */
+    for (int sideIndex = -1; sideIndex <= 1; sideIndex += 2) {
+        DrawTriangle(EnemyPoint(e, -r * 0.23f, sideIndex * r * 0.48f),
+                     EnemyPoint(e, r * 0.14f, sideIndex * r * 1.03f),
+                     EnemyPoint(e, r * 0.33f, sideIndex * r * 0.43f),
+                     (Color){ 67, 18, 43, 255 });
+        DrawTriangle(EnemyPoint(e, -r * 0.58f, sideIndex * r * 0.34f),
+                     EnemyPoint(e, -r * 0.90f, sideIndex * r * 0.78f),
+                     EnemyPoint(e, -r * 0.16f, sideIndex * r * 0.58f),
+                     (Color){ 42, 14, 35, 255 });
+        DrawLineEx(EnemyPoint(e, -r * 0.58f, sideIndex * r * 0.34f),
+                   EnemyPoint(e, -r * 0.90f, sideIndex * r * 0.78f), 1.2f,
+                   EnemyFade(glow, 0.42f));
+    }
+
+    /* Split carapace: layered pointed plates, never a circular body. */
+    Vector2 tip = EnemyPoint(e, r * 1.05f, 0.0f);
+    Vector2 crown = EnemyPoint(e, r * 0.20f, -r * 0.58f);
+    Vector2 shoulder = EnemyPoint(e, -r * 0.55f, -r * 0.43f);
+    Vector2 tail = EnemyPoint(e, -r * 0.82f, 0.0f);
+    Vector2 lower = EnemyPoint(e, -r * 0.55f, r * 0.43f);
+    Vector2 jaw = EnemyPoint(e, r * 0.20f, r * 0.58f);
+    Vector2 core = EnemyPoint(e, -r * 0.13f, 0.0f);
+    DrawTriangle(tip, crown, core, body);
+    DrawTriangle(tip, core, jaw, EnemyFade(body, 0.88f));
+    DrawTriangle(crown, shoulder, core, (Color){ 60, 17, 42, 255 });
+    DrawTriangle(jaw, core, lower, (Color){ 78, 18, 39, 255 });
+    DrawTriangle(shoulder, tail, core, (Color){ 25, 12, 31, 255 });
+    DrawTriangle(lower, core, tail, (Color){ 25, 12, 31, 255 });
+
+    /* Sharp mandibles and a vertical, furnace-like central slit. */
+    DrawTriangle(EnemyPoint(e, r * 0.66f, -r * 0.08f),
+                 EnemyPoint(e, r * 1.00f, -r * 0.27f),
+                 EnemyPoint(e, r * 0.79f, r * 0.02f), (Color){ 19, 8, 24, 255 });
+    DrawTriangle(EnemyPoint(e, r * 0.66f, r * 0.08f),
+                 EnemyPoint(e, r * 1.00f, r * 0.27f),
+                 EnemyPoint(e, r * 0.79f, -r * 0.02f), (Color){ 19, 8, 24, 255 });
+    DrawLineEx(EnemyPoint(e, r * 0.25f, 0.0f), EnemyPoint(e, r * 0.78f, 0.0f), r * 0.105f,
+               EnemyFade(glow, 0.90f));
+    DrawLineEx(EnemyPoint(e, r * 0.31f, 0.0f), EnemyPoint(e, r * 0.68f, 0.0f), 1.0f,
+               (Color){ 255, 245, 222, 255 });
+
+    DrawAlienEye(EnemyPoint(e, r * 0.23f, -r * 0.23f), r * 0.105f,
+                 (Color){ 255, 83, 104, 255 }, (Color){ 30, 3, 15, 255 });
+    DrawAlienEye(EnemyPoint(e, r * 0.23f, r * 0.23f), r * 0.105f,
+                 (Color){ 255, 83, 104, 255 }, (Color){ 30, 3, 15, 255 });
+
+    /* Etched seams catch light as the creature pulses. */
+    DrawLineEx(crown, core, 1.0f, EnemyFade(glow, 0.56f));
+    DrawLineEx(jaw, core, 1.0f, EnemyFade(glow, 0.38f));
+    DrawLineEx(shoulder, tail, 1.1f, EnemyFade((Color){ 255, 159, 177, 255 }, 0.34f));
+    DrawLineEx(lower, tail, 1.1f, EnemyFade((Color){ 255, 159, 177, 255 }, 0.34f));
+}
+
+static void DrawBlueSkitter(const Enemy *e, float r, Color body, Color glow)
+{
+    /* Smaller scout: four blade-like limbs, swept wings and a triple eye cluster. */
+    for (int i = 0; i < 2; ++i) {
+        DrawTendril(e, i, -1.0f, r * 0.92f, (Color){ 12, 26, 57, 255 }, glow);
+        DrawTendril(e, i + 2, 1.0f, r * 0.92f, (Color){ 12, 26, 57, 255 }, glow);
+    }
+    for (int sideIndex = -1; sideIndex <= 1; sideIndex += 2) {
+        DrawTriangle(EnemyPoint(e, r * 0.24f, sideIndex * r * 0.34f),
+                     EnemyPoint(e, -r * 0.10f, sideIndex * r * 1.10f),
+                     EnemyPoint(e, -r * 0.31f, sideIndex * r * 0.31f),
+                     (Color){ 19, 47, 91, 255 });
+        DrawLineEx(EnemyPoint(e, r * 0.18f, sideIndex * r * 0.40f),
+                   EnemyPoint(e, -r * 0.11f, sideIndex * r * 1.03f), 1.2f, EnemyFade(glow, 0.76f));
+    }
+
+    Vector2 tip = EnemyPoint(e, r * 1.15f, 0.0f);
+    Vector2 top = EnemyPoint(e, r * 0.08f, -r * 0.46f);
+    Vector2 rear = EnemyPoint(e, -r * 0.85f, 0.0f);
+    Vector2 bottom = EnemyPoint(e, r * 0.08f, r * 0.46f);
+    Vector2 core = EnemyPoint(e, -r * 0.20f, 0.0f);
+    DrawTriangle(tip, top, core, body);
+    DrawTriangle(tip, core, bottom, EnemyFade(body, 0.88f));
+    DrawTriangle(top, rear, core, (Color){ 11, 27, 59, 255 });
+    DrawTriangle(bottom, core, rear, (Color){ 11, 27, 59, 255 });
+    DrawTriangleLines(tip, top, bottom, EnemyFade(glow, 0.85f));
+    DrawTriangleLines(top, rear, bottom, EnemyFade(glow, 0.48f));
+
+    DrawLineEx(EnemyPoint(e, r * 0.29f, -r * 0.12f), EnemyPoint(e, r * 0.87f, 0.0f), r * 0.10f, glow);
+    DrawAlienEye(EnemyPoint(e, r * 0.30f, 0.0f), r * 0.11f,
+                 (Color){ 83, 236, 255, 255 }, (Color){ 2, 19, 42, 255 });
+    DrawCircleV(EnemyPoint(e, r * 0.06f, -r * 0.20f), r * 0.055f, C_TEXT);
+    DrawCircleV(EnemyPoint(e, r * 0.06f, r * 0.20f), r * 0.055f, C_TEXT);
+}
+
 void DrawEnemy(const Enemy *e)
 {
-    Color base = e->blue ? C_BLUE : C_RED;
-    Color glow = e->blue ? C_CYAN : C_RED;
-    Color body = e->flash > 0.0f ? C_GOLD : base;
+    Color base = e->blue ? (Color){ 34, 113, 175, 255 } : (Color){ 123, 27, 48, 255 };
+    Color glow = e->blue ? C_CYAN : (Color){ 255, 62, 103, 255 };
     float r = e->radius;
-    Vector2 forward = V2(cosf(e->heading), sinf(e->heading));
-    float pulse = 1.0f + 0.07f * sinf(g.worldTime * (e->blue ? 5.5f : 3.2f) + e->pos.x * 0.02f);
-    DrawCircleGradient(e->pos, r * (e->blue ? 2.9f : 2.5f), WithOpacity(glow, 0.35f), WithOpacity(glow, 0.0f));
-    DrawCircleV(e->pos, r * pulse, body);
-    DrawCircleLines((int)e->pos.x, (int)e->pos.y, r * pulse, e->blue ? (Color){ 180, 228, 255, 255 } : (Color){ 255, 172, 180, 255 });
-    DrawLineEx(Add(e->pos, Scale(forward, -r * 0.48f)), Add(e->pos, Scale(forward, r * 0.50f)), e->blue ? 3.0f : 5.0f, e->blue ? (Color){ 12, 34, 88, 255 } : (Color){ 76, 12, 28, 255 });
-    DrawCircleV(Add(e->pos, Scale(forward, r * 0.22f)), e->blue ? 2.4f : 3.2f, C_GOLD);
+    float pulse = 1.0f + 0.045f * sinf(g.worldTime * (e->blue ? 5.6f : 3.2f) + e->pos.x * 0.02f);
+    Color body = e->flash > 0.0f ? C_GOLD : base;
+
+    /* Keep the aura soft and narrow; the body silhouette does the visual work. */
+    DrawCircleGradient(e->pos, r * (e->blue ? 2.0f : 1.85f), EnemyFade(glow, 0.25f), EnemyFade(glow, 0.0f));
+    if (e->blue) DrawBlueSkitter(e, r * pulse, body, glow);
+    else DrawRedWraith(e, r * pulse, body, glow);
+
+    /* Enemy health is shown only when damaged, keeping the arena uncluttered. */
     if (e->hp < e->maxHp) {
         float barW = r * 2.2f;
         DrawRectangleRounded((Rectangle){ e->pos.x - barW * 0.5f, e->pos.y - r - 9.0f, barW, 4.0f }, 0.5f, 4, (Color){ 20, 25, 46, 230 });

@@ -1,15 +1,18 @@
-RIFT RUNNER: SIGNAL ZERO — v0.21.0 modular-source update
+RIFT RUNNER: SIGNAL ZERO — v0.23.0 final polish update
 
 To update an existing GitHub repository without losing its history:
 1. Extract this update ZIP.
-2. Open project-files and copy its contents into your existing local repository root, replacing matching files. Remove the old unused assets/dash.wav file if it is still present.
-3. Keep the .git folder and all repository history. Merge included folders as needed; do not remove assets/, web/, .github/, or tools/.
-4. Commit with summary: Split game systems into readable source files
+2. Open project-files and copy its contents into your existing local repository root, replacing matching files. Do not delete your .git folder.
+3. Keep assets/, web/, .github/, and tools/. Merge the folders; do not paste the project-files folder itself as a new nested directory.
+4. Commit with summary: Final polish: HUD, pickups, touch aiming, and menus
 5. Push origin.
-6. Check Native build check and Build and publish browser game in GitHub Actions.
+6. Check both Native build check and Build and publish browser game in GitHub Actions.
 
-Start reading at main.c. It contains the commented main process and is 133 lines long. Detailed systems are in plainly named files such as player.c, enemies.c, background.c, colors.c, audio.c, and leaderboard.c.
+Start reading at main.c. It contains the commented main process and is 133 lines long. Detailed systems live in plainly named files such as player.c, enemies.c, background.c, colors.c, audio.c, leaderboard.c, and ui.c.
 
-The real raylib build and live browser play-test must pass after pushing before sharing the updated version.
+This update includes distinct enemy silhouettes, five procedural backgrounds, a sector-progress HUD, unique pickup icons, more responsive menus, clickable pause/score navigation, a mobile touch-aim fix, and stable screen shake. The complete space environment changes every 1,000 score using a fade-and-scan transition. The radial explosion transition is removed.
 
-Public Pages URL after a successful deploy: https://oasi-dev.github.io/rift-runner-signal-zero/
+The native raylib build, Emscripten build, and live browser play-test must pass after pushing before treating this release as confirmed.
+
+Public Pages URL after successful deployment:
+https://oasi-dev.github.io/rift-runner-signal-zero/

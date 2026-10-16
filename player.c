@@ -14,6 +14,7 @@ void UpdatePlayer(float dt)
     if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) input.y += 1.0f;
 
     /* Optional touch controls: drag in the left half to move; touch the right half to aim. */
+    bool touchAiming = false;
     int touchCount = GetTouchPointCount();
     if (touchCount > 0) {
         for (int i = 0; i < touchCount; ++i) {
@@ -26,14 +27,18 @@ void UpdatePlayer(float dt)
                 input = Add(input, drag);
             } else {
                 Vector2 aim = Normalize(Sub(touch, p->pos));
-                if (LengthSq(aim) > 0.1f) p->facing = aim;
+                if (LengthSq(aim) > 0.1f) {
+                    p->facing = aim;
+                    touchAiming = true;
+                }
             }
         }
     }
     float inLen = Length(input);
     if (inLen > 1.0f) input = Scale(input, 1.0f / inLen);
     if (LengthSq(input) > 0.02f) {
-        p->facing = Normalize(input);
+        /* Movement sets facing unless the player is explicitly aiming by touch. */
+        if (!touchAiming) p->facing = Normalize(input);
         p->animation += dt * 14.0f;
     }
 
@@ -81,6 +86,18 @@ void DrawRunner(void)
     Vector2 blasterTip = Add(Add(p->pos, Scale(f, 19.5f)), Scale(side, -8.0f));
 
     DrawCircleGradient(p->pos, 36.0f, (Color){ 63, 220, 255, 49 }, (Color){ 63, 220, 255, 0 });
+
+    /* Three short wake lines make movement readable without filling the screen with particles. */
+    float movement = ClampF(Length(p->velocity) / GetDifficulty()->playerSpeed, 0.0f, 1.0f);
+    if (movement > 0.08f) {
+        for (int i = 0; i < 3; ++i) {
+            float back = 21.0f + (float)i * 5.0f;
+            float sideOffset = sinf(g.worldTime * 8.0f + (float)i * 1.9f) * 2.2f;
+            Vector2 a = Add(Add(p->pos, Scale(f, -back)), Scale(side, sideOffset));
+            Vector2 b = Add(a, Scale(f, -(6.0f + movement * 8.0f)));
+            DrawLineEx(a, b, 1.0f + movement, WithOpacity(i == 1 ? C_CYAN : C_BLUE, movement * 0.34f));
+        }
+    }
     if (p->shieldTime > 0.0f) {
         DrawCircleLines((int)p->pos.x, (int)p->pos.y, 27.0f + sinf(g.worldTime * 8.0f) * 2.0f, C_GOLD);
         DrawCircleLines((int)p->pos.x, (int)p->pos.y, 31.0f, WithOpacity(C_GOLD, 0.5f));

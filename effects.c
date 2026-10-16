@@ -53,6 +53,7 @@ void UpdateEffects(float dt)
     g.screenShake = MaxF(0.0f, g.screenShake - dt);
     g.flashAlpha = MaxF(0.0f, g.flashAlpha - 1.75f * dt);
     g.stageNotice = MaxF(0.0f, g.stageNotice - dt);
+    g.backgroundTransition = MaxF(0.0f, g.backgroundTransition - dt);
     g.comboClock = MaxF(0.0f, g.comboClock - dt);
     if (g.comboClock <= 0.0f) g.combo = 0;
 }

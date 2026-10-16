@@ -41,6 +41,7 @@ typedef struct DifficultyInfo {
 /* Shared live game state. Systems are split into small files but work on this state. */
 typedef struct Game {
     GameState state;
+    GameState scoresReturnState; /* Return to title, pause, or game-over from records. */
     Difficulty difficulty;
     Player player;
     Bullet bullets[MAX_BULLETS];
@@ -54,7 +55,7 @@ typedef struct Game {
     bool newPersonalBest;
     bool audioReady, musicLoaded, firstAudioGesture, quitRequested;
     float worldTime, spawnClock, screenShake, flashAlpha, stageNotice;
-    float bananaClock, backgroundBurst, comboClock;
+    float bananaClock, backgroundTransition, comboClock;
     int backgroundTheme, menuSelection;
     Music ambient;
     Sound sounds[SFX_COUNT];
@@ -126,6 +127,8 @@ void DrawScores(void);
 void DrawGameOver(void);
 void DrawPause(void);
 void DrawTouchControls(void);
+void PollUIPointer(void);
+bool GetUIPointerPress(Vector2 *position);
 void DrawFrame(void);
 
 /* Screen lifecycle and input, implemented in game.c / ui.c. */

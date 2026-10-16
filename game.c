@@ -29,7 +29,7 @@ void ResetWorld(void)
     g.flashAlpha = 0.0f;
     g.stageNotice = 0.0f;
     g.bananaClock = RandF(12.0f, 19.0f);
-    g.backgroundBurst = 0.0f;
+    g.backgroundTransition = 0.0f;
     g.backgroundTheme = 0;
     g.player.pos = V2((float)SW() * 0.5f, (float)SH() * 0.5f);
     g.player.facing = V2(1.0f, 0.0f);
@@ -73,6 +73,7 @@ void InitGame(void)
 {
     memset(&g, 0, sizeof(g));
     g.state = STATE_TITLE;
+    g.scoresReturnState = STATE_TITLE;
     g.difficulty = DIFF_MEDIUM;
     g.menuSelection = DIFF_MEDIUM;
     g.worldTime = 0.0f;

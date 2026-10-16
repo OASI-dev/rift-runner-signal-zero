@@ -3,32 +3,97 @@
 #include "game.h"
 #include <math.h>
 
+static Vector2 RotateLocal(Vector2 center, Vector2 local, float angle)
+{
+    float c = cosf(angle), s = sinf(angle);
+    return V2(center.x + local.x * c - local.y * s,
+              center.y + local.x * s + local.y * c);
+}
+
+/* Draw a recognizable golden crescent, not the old generic diamond icon. */
+static void DrawBananaPickup(const Pickup *p, float r)
+{
+    const int segments = 12;
+    float angle = -0.48f + 0.10f * sinf(p->phase * 0.5f);
+    Vector2 outer[segments + 1], inner[segments + 1];
+    for (int i = 0; i <= segments; ++i) {
+        float t = (float)i / (float)segments;
+        float x = (t - 0.5f) * 2.0f * r;
+        float curve = sinf(PI_F * t);
+        float yOuter = -0.10f * r - 0.52f * r * curve;
+        float yInner = yOuter + 0.34f * r * curve;
+        outer[i] = RotateLocal(p->pos, V2(x, yOuter), angle);
+        inner[i] = RotateLocal(p->pos, V2(x, yInner), angle);
+    }
+    DrawCircleGradient(p->pos, r * 2.5f, WithOpacity(C_GOLD, 0.32f), WithOpacity(C_GOLD, 0.0f));
+    for (int i = 0; i < segments; ++i) {
+        DrawTriangle(outer[i], outer[i + 1], inner[i + 1], (Color){ 255, 191, 54, 255 });
+        DrawTriangle(outer[i], inner[i + 1], inner[i], (Color){ 255, 226, 104, 255 });
+        DrawLineEx(outer[i], outer[i + 1], 1.7f, (Color){ 255, 246, 173, 255 });
+        DrawLineEx(inner[i], inner[i + 1], 1.0f, (Color){ 204, 130, 28, 255 });
+    }
+    DrawCircleV(outer[0], 2.0f, (Color){ 255, 238, 143, 255 });
+    DrawCircleV(outer[segments], 2.0f, (Color){ 255, 238, 143, 255 });
+}
+
+static void DrawPickup(const Pickup *p)
+{
+    float pulse = 1.0f + sinf(p->phase * 1.6f) * 0.08f;
+    if (p->kind == PICKUP_BANANA) {
+        DrawBananaPickup(p, 12.0f * pulse);
+        return;
+    }
+
+    Color c = p->kind == PICKUP_DATA ? C_CYAN : C_GREEN;
+    DrawCircleGradient(p->pos, 19.0f * pulse, WithOpacity(c, 0.24f), WithOpacity(c, 0.0f));
+    if (p->kind == PICKUP_DATA) {
+        /* Data fragments: beveled hex chip with a bright central core. */
+        DrawPoly(p->pos, 6, 7.6f * pulse, 30.0f, (Color){ 13, 76, 111, 255 });
+        DrawPolyLines(p->pos, 6, 7.6f * pulse, 30.0f, C_CYAN);
+        DrawLineEx(V2(p->pos.x - 3.0f, p->pos.y), V2(p->pos.x + 3.0f, p->pos.y), 1.5f, C_TEXT);
+        DrawLineEx(V2(p->pos.x, p->pos.y - 3.0f), V2(p->pos.x, p->pos.y + 3.0f), 1.5f, C_TEXT);
+    } else {
+        /* Repair cell: a green capsule/cross remains readable at small size. */
+        DrawRectangleRounded((Rectangle){ p->pos.x - 7.0f * pulse, p->pos.y - 7.0f * pulse,
+                                            14.0f * pulse, 14.0f * pulse }, 0.25f, 5,
+                             (Color){ 17, 77, 61, 255 });
+        DrawRectangle((int)(p->pos.x - 2.0f * pulse), (int)(p->pos.y - 5.0f * pulse),
+                      (int)(4.0f * pulse), (int)(10.0f * pulse), C_GREEN);
+        DrawRectangle((int)(p->pos.x - 5.0f * pulse), (int)(p->pos.y - 2.0f * pulse),
+                      (int)(10.0f * pulse), (int)(4.0f * pulse), C_GREEN);
+        DrawRectangleRoundedLinesEx((Rectangle){ p->pos.x - 7.0f * pulse, p->pos.y - 7.0f * pulse,
+                                                  14.0f * pulse, 14.0f * pulse }, 0.25f, 5, 1.0f,
+                                    WithOpacity(C_GREEN, 0.75f));
+    }
+}
+
 void DrawWorld(void)
 {
     for (int i = 0; i < MAX_PICKUPS; ++i) {
-        Pickup *p = &g.pickups[i];
-        if (!p->active) continue;
-        Color c = p->kind == PICKUP_BANANA ? C_GOLD : (p->kind == PICKUP_DATA ? C_CYAN : C_GREEN);
-        float r = (p->kind == PICKUP_BANANA ? 11.0f : 6.2f) + sinf(p->phase) * 1.6f;
-        DrawCircleGradient(p->pos, 24.0f, WithOpacity(c, 0.27f), (Color){ c.r, c.g, c.b, 0 });
-        DrawPoly(p->pos, 4, r + 2.0f, 45.0f, WithOpacity(c, 0.44f));
-        DrawPoly(p->pos, 4, r, 45.0f, c);
-        DrawCircleV(p->pos, 2.0f, C_TEXT);
+        const Pickup *p = &g.pickups[i];
+        if (p->active) DrawPickup(p);
     }
+
     for (int i = 0; i < MAX_BULLETS; ++i) {
         Bullet *b = &g.bullets[i];
         if (!b->active) continue;
         Vector2 tail = Sub(b->pos, Scale(Normalize(b->vel), 16.0f));
         DrawLineEx(tail, b->pos, 3.0f, WithOpacity(b->color, 0.45f));
-        DrawCircleGradient(b->pos, 10.0f, WithOpacity(b->color, 0.56f), (Color){ b->color.r, b->color.g, b->color.b, 0 });
+        DrawCircleGradient(b->pos, 10.0f, WithOpacity(b->color, 0.56f),
+                           (Color){ b->color.r, b->color.g, b->color.b, 0 });
         DrawCircleV(b->pos, b->radius, C_CYAN);
     }
-    for (int i = 0; i < MAX_ENEMIES; ++i) if (g.enemies[i].active) DrawEnemy(&g.enemies[i]);
+
+    for (int i = 0; i < MAX_ENEMIES; ++i) {
+        if (g.enemies[i].active) DrawEnemy(&g.enemies[i]);
+    }
+
     for (int i = 0; i < MAX_PARTICLES; ++i) {
         Particle *p = &g.particles[i];
         if (!p->active) continue;
         float a = ClampF(p->life / p->fullLife, 0.0f, 1.0f);
         DrawCircleV(p->pos, p->radius * (0.36f + 0.64f * a), WithOpacity(p->color, a));
     }
+
     if (g.state == STATE_PLAYING || g.state == STATE_PAUSED || g.state == STATE_GAME_OVER) DrawRunner();
 }

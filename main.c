@@ -40,14 +40,11 @@ void UpdatePlaying(float dt)
     /* 6. Temporary effects: particles, combo timer, screen shake and flashes. */
     UpdateEffects(dt);
 
-    /* 7. Change the background every 1,000 score and play the radial burst. */
+    /* 7. Change to a new space environment every 1,000 score. */
     if (g.score / 1000 != g.backgroundTheme) {
         g.backgroundTheme = g.score / 1000;
-        g.backgroundBurst = 1.2f;
-        g.flashAlpha = 0.15f;
-        PlaySfx(SFX_SURGE);
+        g.backgroundTransition = 0.90f;
     }
-    g.backgroundBurst = MaxF(0.0f, g.backgroundBurst - dt);
 
     /* 8. Occasionally create a banana pickup somewhere inside the arena. */
     g.bananaClock -= dt;
@@ -82,6 +79,9 @@ void GameFrame(void)
         UpdateMusicStream(g.ambient);
         if (!IsMusicStreamPlaying(g.ambient)) PlayMusicStream(g.ambient);
     }
+
+    /* Poll mouse/touch once per frame so every menu uses the same input edge. */
+    PollUIPointer();
 
     /* Route input and time to the active screen/game state. */
     switch (g.state) {

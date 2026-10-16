@@ -2,7 +2,7 @@
 #define RR_ENEMY_H
 #include "raylib.h"
 #include <stdbool.h>
-/* One enemy, including movement/turning state and red-or-blue type. */
+/* One enemy, including movement/turning state and red-wraith/blue-skitter type. */
 typedef struct Enemy {
     bool active;
     Vector2 pos, vel;
