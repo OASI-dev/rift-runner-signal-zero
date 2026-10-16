@@ -72,7 +72,7 @@ Vector2 V2(float x, float y);
 Vector2 Add(Vector2 a, Vector2 b);
 Vector2 Sub(Vector2 a, Vector2 b);
 Vector2 Scale(Vector2 a, float s);
-Vector2 Normalize(Vector2 v);
+Vector2 RRNormalizeVector2(Vector2 v);
 Vector2 Perp(Vector2 v);
 float DistSq(Vector2 a, Vector2 b);
 Color Alpha(Color c, float a);

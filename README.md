@@ -100,11 +100,12 @@ The code is split by responsibility so the main process is easy to follow:
 - `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
 - `helpers.c` — shared math and drawing helpers.
 
-Start with `main.c` to understand the game flow. It is **127 lines** in v0.25.1; open the named system file for the implementation of any one part.
+Start with `main.c` to understand the game flow. It is **127 lines** in v0.25.2; open the named system file for the implementation of any one part.
 
 
-## v0.25.1 — audio rollback and native CI reliability
+## v0.25.2 — native linker collision fix and audio rollback
 
 - Removed the added space ambience loop, distant whispers/rumble, and rift-change sound. There is still no music; the original five one-shot sound effects remain.
 - Pinned Linux CI and browser workflow runners to Ubuntu 24.04 for a stable CMake/dependency environment.
 - Enabled GNU C99 extensions consistently for raylib's native and browser targets while retaining C99 as the language standard.
+- Renamed the game math helper `Normalize` to `RRNormalizeVector2` to prevent a duplicate-symbol error against raylib internals when linking the desktop build.

@@ -1,4 +1,4 @@
-# Release status — RIFT RUNNER: SIGNAL ZERO v0.25.1
+# Release status — RIFT RUNNER: SIGNAL ZERO v0.25.2
 
 ## Included in this package
 
@@ -7,7 +7,7 @@
 - There is no music and no added background ambience. The original five one-shot effects remain: shot, impact, pickup, enemy-down and stage-surge.
 - No combo counter, kill counter, floating score popups, repair kits or data pickups.
 - The five procedural backgrounds, three personal-best scores, modular source and 127-line main flow remain.
-- Added the missing standard-library declaration for `rand()` that the native compiler could reject, and configured compiler diagnostics to fail on future undeclared function calls. Linux CI and web workflows are pinned to Ubuntu 24.04, and the build uses GNU C99 extensions for compatibility.
+- Added the missing standard-library declaration for `rand()` that the native compiler could reject, and configured compiler diagnostics to fail on future undeclared function calls. Renamed the game math helper to `RRNormalizeVector2` to avoid raylib’s duplicate `Normalize` linker symbol. Linux CI and web workflows are pinned to Ubuntu 24.04, and the build uses GNU C99 extensions for compatibility.
 
 ## Verification status
 

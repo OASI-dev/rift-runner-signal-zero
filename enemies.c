@@ -73,7 +73,7 @@ void UpdateEnemies(float dt)
             /* EASY: pure roaming. Random steering changes keep enemies unpredictable. */
             e->heading += e->turnRate * dt * 1.35f;
         } else {
-            Vector2 toPlayer = Normalize(Sub(g.player.pos, e->pos));
+            Vector2 toPlayer = RRNormalizeVector2(Sub(g.player.pos, e->pos));
             float desired = atan2f(toPlayer.y, toPlayer.x);
             float delta = atan2f(sinf(desired - e->heading), cosf(desired - e->heading));
 
@@ -102,7 +102,7 @@ void UpdateEnemies(float dt)
             g.player.invulnerable = 0.92f;
             g.screenShake = 0.20f;
             g.flashAlpha = 0.10f;
-            Vector2 knock = Normalize(Sub(g.player.pos, e->pos));
+            Vector2 knock = RRNormalizeVector2(Sub(g.player.pos, e->pos));
             g.player.pos = Add(g.player.pos, Scale(knock, 30.0f));
             e->pos = Add(e->pos, Scale(knock, -22.0f));
             Burst(g.player.pos, C_PINK, 16, 150.0f, 2.3f);

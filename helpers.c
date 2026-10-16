@@ -24,7 +24,7 @@ Vector2 Sub(Vector2 a, Vector2 b) { return V2(a.x - b.x, a.y - b.y); }
 
 Vector2 Scale(Vector2 a, float s) { return V2(a.x * s, a.y * s); }
 
-Vector2 Normalize(Vector2 v) { float len = Length(v); return (len > 0.0001f) ? Scale(v, 1.0f / len) : V2(0.0f, 0.0f); }
+Vector2 RRNormalizeVector2(Vector2 v) { float len = Length(v); return (len > 0.0001f) ? Scale(v, 1.0f / len) : V2(0.0f, 0.0f); }
 
 Vector2 Perp(Vector2 v) { return V2(-v.y, v.x); }
 

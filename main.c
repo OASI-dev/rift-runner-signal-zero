@@ -40,7 +40,7 @@ void UpdatePlaying(float dt)
     /* 6. Temporary effects: hit particles, screen shake and transition flashes. */
     UpdateEffects(dt);
 
-    /* 7. Change to a new space environment every 1,000 score, with a rift sound. */
+    /* 7. Change to a new space environment every 1,000 score. */
     if (g.score / 1000 != g.backgroundTheme) {
         g.backgroundTheme = g.score / 1000;
         g.backgroundTransition = 0.90f;

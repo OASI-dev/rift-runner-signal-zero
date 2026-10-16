@@ -1,4 +1,4 @@
-# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.25.1
+# Release checklist — RIFT RUNNER: SIGNAL ZERO 0.25.2
 
 ## Code/package checks
 

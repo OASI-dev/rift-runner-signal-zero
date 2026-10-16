@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.25.2 — fix native Normalize linker collision
+
+- Renamed the project math helper `Normalize` to `RRNormalizeVector2` to avoid colliding with raylib’s internal `Normalize` symbol when linking the native build.
+- Preserved the original five one-shot sound effects; no music or ambience loop.
+- Kept Easy random roaming, Medium pursuit, Hard mixed pursuit/random movement, and banana +20 health / 8-second shield.
+
 ## v0.25.1 — restore original sound effects and stabilize CI
 
 - Removed the added background ambience, whisper/rumble accents, and rift-transition sound. The game has no music and uses only its original five one-shot effects.

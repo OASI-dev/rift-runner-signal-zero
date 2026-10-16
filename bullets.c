@@ -5,7 +5,7 @@
 
 void AddBullet(Vector2 pos, Vector2 dir)
 {
-    dir = Normalize(dir);
+    dir = RRNormalizeVector2(dir);
     if (LengthSq(dir) < 0.5f) dir = g.player.facing;
     for (int i = 0; i < MAX_BULLETS; ++i) {
         if (!g.bullets[i].active) {

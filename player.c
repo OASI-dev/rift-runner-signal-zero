@@ -26,7 +26,7 @@ void UpdatePlayer(float dt)
                 if (dragLen > 1.0f) drag = Scale(drag, 1.0f / dragLen);
                 input = Add(input, drag);
             } else {
-                Vector2 aim = Normalize(Sub(touch, p->pos));
+                Vector2 aim = RRNormalizeVector2(Sub(touch, p->pos));
                 if (LengthSq(aim) > 0.1f) {
                     p->facing = aim;
                     touchAiming = true;
@@ -38,14 +38,14 @@ void UpdatePlayer(float dt)
     if (inLen > 1.0f) input = Scale(input, 1.0f / inLen);
     if (LengthSq(input) > 0.02f) {
         /* Movement sets facing unless the player is explicitly aiming by touch. */
-        if (!touchAiming) p->facing = Normalize(input);
+        if (!touchAiming) p->facing = RRNormalizeVector2(input);
         p->animation += dt * 14.0f;
     }
 
     Vector2 mouse = GetMousePosition();
     bool mouseAiming = IsMouseButtonDown(MOUSE_BUTTON_LEFT) || IsMouseButtonDown(MOUSE_BUTTON_RIGHT);
     if (mouseAiming) {
-        Vector2 mouseAim = Normalize(Sub(mouse, p->pos));
+        Vector2 mouseAim = RRNormalizeVector2(Sub(mouse, p->pos));
         if (LengthSq(mouseAim) > 0.1f) p->facing = mouseAim;
     }
     if (LengthSq(input) > 0.02f) p->velocity = Scale(input, d->playerSpeed);
@@ -68,7 +68,7 @@ void UpdatePlayer(float dt)
 void DrawRunner(void)
 {
     Player *p = &g.player;
-    Vector2 f = Normalize(p->facing);
+    Vector2 f = RRNormalizeVector2(p->facing);
     Vector2 side = Perp(f);
     bool blinking = p->invulnerable > 0.0f && ((int)(g.worldTime * 22.0f) % 2 == 0);
     Color armor = (p->shieldTime > 0.0f) ? C_GOLD : C_TEXT;

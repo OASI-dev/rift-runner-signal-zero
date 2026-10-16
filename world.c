@@ -52,7 +52,7 @@ void DrawWorld(void)
     for (int i = 0; i < MAX_BULLETS; ++i) {
         Bullet *b = &g.bullets[i];
         if (!b->active) continue;
-        Vector2 tail = Sub(b->pos, Scale(Normalize(b->vel), 16.0f));
+        Vector2 tail = Sub(b->pos, Scale(RRNormalizeVector2(b->vel), 16.0f));
         DrawLineEx(tail, b->pos, 3.0f, WithOpacity(b->color, 0.45f));
         DrawCircleGradient(b->pos, 10.0f, WithOpacity(b->color, 0.56f),
                            (Color){ b->color.r, b->color.g, b->color.b, 0 });
