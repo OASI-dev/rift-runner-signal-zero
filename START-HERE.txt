@@ -1,9 +1,9 @@
-RIFT RUNNER: SIGNAL ZERO — v0.26.0 final difficulty rebalance
+RIFT RUNNER: SIGNAL ZERO — v0.26.0 SINGLE-FILE EDITION
 
-For an existing repository, use the v0.26.0 UPDATE ZIP. Extract it, open the project-files folder, and copy its contents into your local repository folder, replacing matching files. Keep the .git folder.
+The game code is combined into ONE C source file: main.c. The other .c and custom .h module files have been removed from this edition. The game still uses raylib, CMake, the assets/ directory, browser support files in web/, and GitHub Actions workflows.
 
-The release includes the final Easy / Medium / Hard rebalance, the five original one-shot sound effects only, no music or looping ambience, the banana pickup (+up to 20 health and an 8-second shield), and the RRNormalizeVector2 native linker fix. main.c is 134 lines.
+For a fresh installation, extract the single-file source ZIP into a new folder. For an existing GitHub repository, copy the package files into the repo, replace matching files, and DELETE the old gameplay module .c and .h files listed in DELETE-OLD-FILES.txt. Keep .git/, assets/, web/, tools/, and .github/. Do not delete the five current WAV files.
 
-After copying, review the changes in GitHub Desktop, commit them, and push to the main branch. Then verify the Native build check and Build and publish browser game workflows in GitHub Actions. Open the published Pages URL and test a full run before treating the release as confirmed.
+The game keeps the v0.26.0 difficulty rebalance, banana pickup (+up to 20 health and an 8-second shield), five original one-shot sound effects, no music or ambience, and RRNormalizeVector2 naming fix.
 
-Build status: source package and ZIP integrity checks are verified locally; native raylib compilation, Emscripten compilation, deployment, and hands-on gameplay testing still require the GitHub workflows and deployed game.
+After updating, review the file deletions/additions in GitHub Desktop, commit, push to main, check Native build check and Build and publish browser game under GitHub Actions, and test the published game. A package check is not the same as a confirmed native/browser build or play-test.

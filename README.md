@@ -1,6 +1,6 @@
-# RIFT RUNNER: SIGNAL ZERO
+# RIFT RUNNER: SIGNAL ZERO — single-file edition
 
-**A score-first neon survival shooter written in C and raylib.** Start with [`main.c`](main.c) to follow the main game process. Player movement, enemies, backgrounds, colors, sound, score storage, and menus are implemented in separate, plainly named files so each part is easier to understand and change.
+**A score-first neon survival shooter written in C and raylib.** In this edition, all game code has been combined into **one `main.c` file** so you can read the whole game in one place. There are no separate game-module `.c` or custom `.h` source files.
 
 ## Play in your browser
 
@@ -8,105 +8,60 @@ After the `Build and publish browser game` workflow passes and GitHub Pages fini
 
 **https://oasi-dev.github.io/rift-runner-signal-zero/**
 
-The workflow publishes the WebAssembly build from this repository. If the most recent workflow run is red or deployment has not completed, the link may not yet contain the latest version.
+The workflow publishes the WebAssembly build from this repository. If the latest workflow run is red or deployment has not completed, the link may not yet contain this edition.
 
-## Gameplay
+## Gameplay at a glance
 
-- **Character movement:** WASD or arrow keys. The armored runner faces the latest movement direction.
-- **Firing:** automatic blaster fire toward the facing direction. Hold the left mouse button to aim with the cursor.
-- **Choose difficulty:** Easy, Medium, or Hard from the title screen using 1/2/3 or left/right arrows.
-- **Two alien silhouettes:** larger red wraiths have angular carapaces, glowing eyes, mandibles and moving tendrils; smaller blue skitters have swept fins and a triple-eye cluster. Blue skitters deal less contact damage. Easy enemies roam randomly, Medium enemies pursue the player, and Hard enemies combine pursuit with randomized steering plus denser, faster pressure waves.
-- **Score-driven stages and backgrounds:** Rift Stage pressure rises at 500-point milestones. The entire space environment changes every 1,000 score: ringed worlds, asteroid graveyards, dimensional rifts, a cratered blood moon, and a void cathedral. A named-sector HUD and progress bar show when the next environment shift is coming. Transitions use a soft fade-and-scan, not an exploding radial burst.
-- **Score is the objective:** no kill counter, combo counter, floating point popups, or survival-time counter. Each alien grants a fixed score.
-- **Three-score leaderboard:** press **B** to see exactly three personal records: the best Easy score, best Medium score, and best Hard score. A mode's record changes only when you beat that mode's previous score. Records are saved on this device/browser, not on a shared server.
-- **Pause/resume:** P or Esc during a run. Resume or return to the flight deck with keyboard, mouse, or touch.
-- **One pickup only:** the golden banana restores up to 20 health and grants an 8-second shield. No health kits, repair cells, or data chips spawn.
-- **Sound:** no music and no background ambience. Only the original five one-shot effects play: shot, impact, pickup, enemy-down and stage-surge. Background changes are visual only.
+- **Movement:** WASD or arrow keys. Touch users can drag on the left side of the browser canvas to move.
+- **Aiming and firing:** hold the left mouse button to aim/fire toward the cursor; touch users aim on the right side.
+- **Difficulty:** Easy, Medium, or Hard. Easy enemies roam randomly; Medium enemies pursue; Hard enemies combine pursuit and randomized steering with extra pressure spawns.
+- **Enemies:** red Wraiths and blue Skitters, with different size, durability and contact damage.
+- **Banana pickup:** restores up to 20 health and grants an 8-second shield. Health never exceeds maximum.
+- **Progression:** score raises stage pressure. The space environment changes every 1,000 points.
+- **Personal bests:** one local best score for each of Easy, Medium and Hard. Records stay on the same device/browser.
+- **Audio:** exactly five original one-shot WAV effects—shot, impact, pickup, enemy defeated and stage surge. No music or ambience.
 
-### Touch screens
+## Controls
 
-The browser build includes touch movement and aiming. Drag on the left side to move and touch on the right side to aim; the two controls work independently. Menus and pause navigation also support mouse/touch. Keyboard/mouse controls remain the primary desktop experience, and specific mobile browsers should still be tested.
+| Action | Keyboard / mouse |
+|---|---|
+| Move | WASD or arrow keys |
+| Aim / fire | Hold left mouse button toward the cursor |
+| Pause / resume | P or Escape |
+| Select difficulty | 1 / 2 / 3 or left/right arrows on the title screen |
+| Personal-best screen | B |
+| Start / choose | Enter or Space; use mouse/touch on menu buttons |
 
-## Release verification
+## Single-file code map
 
-A successful source package is not the same as a verified game build. After pushing updates, check both GitHub Actions workflows—**Native build check** and **Build and publish browser game**—then open the deployed Pages link and test movement, aiming, pause/resume, pickups, score saving, and the 1,000-point environment transition.
+Open `main.c`. The file is arranged in labelled sections to make a long file easier to navigate:
+
+- **Shared declarations:** game structs, difficulty settings, and function declarations that previously lived in headers.
+- **Math and color helpers:** reusable vector, distance, clamp, opacity and drawing helpers.
+- **Backgrounds:** procedural space scenes and transitions.
+- **Player:** movement, aiming, firing cadence, shield and runner drawing.
+- **Enemies:** spawn rules, difficulty AI, contact damage, hit points, rewards and enemy drawing.
+- **Bullets / pickups / effects:** projectiles, banana behavior, particles and screen feedback.
+- **World rendering:** draws the action and objects in layers.
+- **Audio / leaderboard:** five sound effects and local per-difficulty records.
+- **Game lifecycle:** initialize, reset, start and end runs; choose difficulty.
+- **UI:** title menu, HUD, pause, game over, leaderboard, touch controls.
+- **Main process:** `UpdatePlaying`, `GameFrame`, and `main`—the program entry point.
+
+Search for `SECTION:` in `main.c` to jump between the original modules now embedded in the same file.
 
 ## Build a desktop version
 
-Players should not need Visual Studio or CMake when you provide a prebuilt release. These are developer tools. Tagged GitHub releases are configured to produce ready-to-run ZIPs for Windows, Linux, and macOS when all release jobs pass.
+CMake downloads raylib 6.0 on the first configure, so an internet connection is needed the first time. Follow [BUILDING.md](BUILDING.md). The code itself is one `main.c`; CMake and raylib are still used to build the application.
 
-For developers building from source, see [BUILDING.md](BUILDING.md).
+## Build and publish the browser version
 
-## Project structure
+Push the repository to GitHub and check **Actions → Build and publish browser game**. The workflow uses Emscripten and deploys the resulting game to GitHub Pages. In repository **Settings → Pages**, select **GitHub Actions** as the source.
 
-```text
-rift-runner-signal-zero/
-├── main.c                 # Main game flow and frame loop (commented and readable)
-├── game.c / game.h        # Game state, difficulty and shared declarations
-├── player.c / player.h    # Player movement, aiming and character drawing
-├── enemies.c / enemy.h    # Enemy spawning, movement, damage and rendering
-├── bullets.c / bullets.h  # Blaster projectiles and hit detection
-├── pickups.c / pickups.h  # Banana-only health and shield pickup
-├── background.c / background.h # Distinct procedural space environments and fade transitions
-├── colors.c / colors.h    # Shared palette
-├── audio.c / audio.h      # Sound initialization and playback
-├── leaderboard.c          # Three personal-best records
-├── effects.c              # Lightweight hit particles and screen feedback
-├── world.c                # Gameplay object draw order
-├── ui.c                   # Menus, HUD and pause/game-over screens
-├── helpers.c              # Shared math and drawing helpers
-├── CMakeLists.txt         # raylib build and desktop/browser targets
-├── assets/                # five bundled one-shot WAV sound effects
-├── web/
-│   ├── index.html         # public browser landing page
-│   └── idbfs-pre.js       # browser-persistent local score storage
-└── .github/workflows/     # native CI, browser deployment, desktop releases
-```
+## Verification boundary
 
-## Score storage and privacy
-
-The three personal bests are stored locally as three integers, one per difficulty. They are not sent to a server. Clearing browser data can clear browser records. A cross-player online leaderboard would require a backend service and abuse prevention, and is not claimed in this version.
+Source packaging and audio checks can be run locally; a successful ZIP check does not prove a full compile or gameplay test. Confirm the native and browser GitHub Actions workflows pass, then test the live game.
 
 ## License
 
-The project source and bundled original game assets are distributed under the repository's [LICENSE](LICENSE). raylib is a separate third-party dependency with its own license.
-
-
-## v0.20.0 gameplay changes
-
-- Removed Phase Dash completely.
-- Easy enemies roam randomly; Medium enemies gently steer toward the runner; Hard enemies pursue more strongly.
-- Added smaller blue enemies (lower health and contact damage) alongside red enemies.
-- The full background environment changes every 1,000 score with a soft fade transition; there is no radial explosion effect.
-- Bananas appear periodically; collecting one restores up to 20 health and grants an 8-second shield.
-
-## Source code layout
-
-The code is split by responsibility so the main process is easy to follow:
-
-- `main.c` — application entry point, frame loop, and the commented order of gameplay systems.
-- `game.c` — start/reset/end a run and difficulty settings.
-- `game.h` — shared game state and declarations used between systems.
-- `player.c` / `player.h` — player movement, aiming, shield display and character drawing.
-- `enemies.c` / `enemy.h` — enemy spawning, movement/AI, damage, rewards and drawing.
-- `bullets.c` / `bullets.h` — blaster shots and collision checks.
-- `pickups.c` / `pickups.h` — the single banana health-and-shield pickup.
-- `background.c` / `background.h` — five procedural space environments with fade transitions.
-- `colors.c` / `colors.h` — shared color palette.
-- `audio.c` / `audio.h` — audio initialization and sound playback.
-- `leaderboard.c` — load/save the three personal-best scores.
-- `effects.c` — hit particles and screen feedback.
-- `world.c` — draws the active gameplay objects in layers.
-- `ui.c` — menus, HUD, pause/game-over screens and overall drawing composition.
-- `helpers.c` — shared math and drawing helpers.
-
-Start with `main.c` to understand the game flow. It is **134 lines** in v0.26.0; open the named system file for the implementation of any one part.
-
-
-## v0.26.0 — final difficulty rebalance
-
-- Rebalanced Easy, Medium, and Hard across starting health, player speed, fire interval, spawn interval, enemy speed, contact damage, active enemy limits, and bonus spawn pressure.
-- Hard receives additional pressure spawns starting at stage 3, plus a small chance of a third enemy spawn from stage 7. Easy and Medium retain their stage-4 bonus-spawn chance.
-- Preserved the banana pickup (+up to 20 health and an 8-second shield), the original five one-shot sound effects, and the no-music/no-ambience rule.
-- Carries forward the `RRNormalizeVector2` native linker fix and the pinned Ubuntu 24.04 CI/browser workflows.
-- `main.c` is 134 lines, including comments and blank lines.
+The project source and bundled game assets are distributed under `LICENSE`. raylib is a separate third-party dependency with its own license.

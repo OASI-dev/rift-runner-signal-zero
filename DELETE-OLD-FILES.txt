@@ -1,12 +1,11 @@
-This source layout replaces the previous single-file gameplay organization.
+SINGLE-FILE EDITION: files that are no longer needed
 
-When applying the update to an existing repository:
-- Replace the old main.c with the included main.c.
-- Add all included root-level .c and .h files.
-- Update CMakeLists.txt so every module is compiled.
-- Do not delete .git/ or repository history.
-- Keep assets/, web/, .github/, and tools/.
-- Delete assets/dash.wav if it remains from an earlier version; the dash mechanic and its sound are no longer used.
-- If an old src/ or tests/ folder exists from an earlier version, do not use those stale C sources in the build; CMake should build the root-level modules listed in CMakeLists.txt.
+The complete gameplay implementation is now in main.c. When applying this update to an existing modular repository, delete the following old source/header files after copying the new main.c and CMakeLists.txt:
 
-- Delete obsolete audio files if they remain: ambient_loop.wav, space_ambience.wav, rift_shift.wav, void_whisper.wav, and deep_rumble.wav. v0.26.0 keeps only the original five one-shot effects and has no music or ambience.
+Old .c files (do not delete main.c):
+audio.c, background.c, bullets.c, colors.c, effects.c, enemies.c, game.c, helpers.c, leaderboard.c, pickups.c, player.c, ui.c, world.c
+
+Old custom .h files:
+audio.h, background.h, bullets.h, colors.h, effects.h, enemy.h, game.h, pickups.h, player.h
+
+Keep: .git/, main.c, CMakeLists.txt, assets/, web/, tools/, .github/, LICENSE, README.md and other documentation. Remove obsolete dash or ambience audio assets if they exist; v0.26.0 uses only shot.wav, impact.wav, pickup.wav, enemy_down.wav and surge.wav.

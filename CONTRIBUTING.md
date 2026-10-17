@@ -1,19 +1,16 @@
-# Contributing
+# Contributing to RIFT RUNNER: SIGNAL ZERO
 
-Thanks for helping with RIFT RUNNER: SIGNAL ZERO.
+This repository uses the **single-file source edition**: all game code lives in `main.c`. The labelled `SECTION:` comments identify where code from the earlier modular files was merged.
 
-## Source layout
+## Making changes
 
-- Keep `main.c` as a commented outline of the main process. Put detailed implementations in the matching, plainly named system files (for example, `player.c`, `enemies.c`, `background.c`, `audio.c`, and `leaderboard.c`).
-- Keep build/deployment instructions, browser hosting glue, workflows, and bundled WAV assets in their own files.
-- Do not vendor raylib source into the repository; CMake fetches raylib 6.0 for builds.
-- Avoid survival-time scoring UI. Rift Stage pressure must progress from score milestones.
-- Keep exactly three local personal bests (Easy, Medium, Hard); do not label them an online/global leaderboard.
+1. Read the relevant section in `main.c` before editing it.
+2. Keep gameplay behavior consistent with the version notes in `CHANGELOG.md`.
+3. Do not add new project-owned `.c` or `.h` files unless you are intentionally changing the project away from the single-file edition. The standard library and raylib headers are still used.
+4. Keep original one-shot sounds in `assets/`: `shot.wav`, `impact.wav`, `pickup.wav`, `enemy_down.wav` and `surge.wav`. No music or ambient loops are part of v0.26.0.
+5. Run `python3 tools/check_assets.py` after changing audio assets.
+6. Confirm both GitHub Actions workflows pass and test the deployed game before calling a release verified.
 
-## Local checks
+## Build
 
-```sh
-./tools/validate.sh
-```
-
-This configures and builds the native target and checks the bundled WAV assets. The GitHub Actions workflows independently compile the native and WebAssembly targets. A successful source check is not a substitute for play-testing the actual browser build.
+See `BUILDING.md`. CMake compiles only `main.c` and links it with raylib 6.0 for desktop and web targets.

@@ -32,19 +32,6 @@ endif()
 
 add_executable(rift_runner
     main.c
-    game.c
-    helpers.c
-    colors.c
-    background.c
-    player.c
-    enemies.c
-    bullets.c
-    pickups.c
-    effects.c
-    world.c
-    audio.c
-    leaderboard.c
-    ui.c
 )
 target_link_libraries(rift_runner PRIVATE raylib)
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")

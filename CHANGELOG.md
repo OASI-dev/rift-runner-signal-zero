@@ -1,11 +1,16 @@
-## v0.26.0 — final difficulty rebalance
+## v0.26.0 — single-file edition (combined source)
+
+- Combined every gameplay module into one labelled `main.c`, including shared structures and declarations formerly stored in custom headers.
+- Updated CMake to compile only `main.c`; retained assets, web support, workflows, and build scripts.
+- The gameplay rebalance, banana shield, five original one-shot sounds, no-music rule, and raylib naming fix are preserved.
+
+## v0.26.0 — single-file edition and final difficulty rebalance
 
 - Easy: slightly faster enemy arrivals than before, roaming behavior, 130 starting health, and 13 base red-enemy contact damage.
 - Medium: faster arrivals, faster enemies, and 25 base red-enemy contact damage.
 - Hard: 0.58-second base spawn interval, 120 base enemy speed, 34 base red-enemy contact damage, 85 starting health, a higher on-screen enemy cap (48), extra spawns from stage 3, and a rare third spawn from stage 7.
 - Increased simultaneous enemy allowance by difficulty; stage scaling still increases pressure over time.
 - Preserved +20 health / 8-second banana shield, original five sound effects, no music, and the raylib `RRNormalizeVector2` name-collision fix.
-- `main.c`: 134 lines including comments and blank lines.
 
 # Changelog
 

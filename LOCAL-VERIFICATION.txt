@@ -1,0 +1,12 @@
+RIFT RUNNER: SIGNAL ZERO v0.26.0 — single-file edition verification
+
+PASS: The package contains exactly one project-owned .c file: main.c.
+PASS: No project-owned custom .h files remain.
+PASS: CMake's executable source list contains main.c only.
+PASS: A structural source scan found exactly one main() definition.
+PASS: C braces and preprocessor conditionals are balanced in the merged source.
+PASS: No duplicate static helper function names were detected in the merged source.
+PASS: tools/check_assets.py validated all five PCM WAV assets.
+PASS: Documentation now describes the single-file architecture.
+
+NOT VERIFIED HERE: a native or Emscripten compile against the actual raylib dependency, browser deployment, or hands-on gameplay. Network name resolution was unavailable in this environment, so raylib's source could not be downloaded for a real CMake build. GitHub Actions and an in-browser test remain the proper final checks.

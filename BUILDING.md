@@ -1,22 +1,16 @@
-# Building RIFT RUNNER: SIGNAL ZERO
+# Building RIFT RUNNER: SIGNAL ZERO — single-file edition
 
-The game is organized into small C modules. Start with `main.c` for the commented frame loop and game-process outline. CMake compiles the modules together with raylib into a native executable or a browser/WebAssembly build.
+The entire game implementation is in `main.c`. CMake builds that one source file together with the raylib library. The sound effects remain in `assets/`; the browser page and score-persistence helper remain in `web/`.
 
-## Browser release (recommended for sharing a link)
+## Browser release
 
-The repository's `.github/workflows/deploy-web.yml` builds with Emscripten on GitHub's runners and deploys to GitHub Pages. You do not need to install the Emscripten SDK, Visual Studio, or CMake locally just to publish the browser build:
+The `.github/workflows/deploy-web.yml` workflow builds with Emscripten and deploys to GitHub Pages. To publish, push the repository to `main`, set **Settings → Pages → Source** to **GitHub Actions**, then open **Actions → Build and publish browser game**. Wait for both the build and deploy jobs to pass and open the Pages URL from the summary.
 
-1. Push the repository's files to the `main` branch.
-2. In repository **Settings → Pages**, set the source to **GitHub Actions**.
-3. Open **Actions → Build and publish browser game**.
-4. Wait for the workflow's build and deploy jobs to both pass.
-5. Open the Pages URL shown in the deployment summary.
+The web workflow uses raylib 6.0 and Emscripten 3.1.64. The CMake configuration enables GNU C99 extensions for the web target because Emscripten's `EM_ASM` macros require them.
 
-The workflow uses raylib 6.0 and Emscripten 3.1.64. For raylib's Web backend, the CMake target enables GNU C99 extensions because Emscripten's `EM_ASM` macros are rejected in strict `-std=c99` mode.
+## Windows desktop build (developers)
 
-## Windows desktop build (developers only)
-
-Install Visual Studio Community with **Desktop development with C++**, including CMake tools and a Windows SDK. Then use a Developer PowerShell in the project root:
+Install Visual Studio Community with **Desktop development with C++**, CMake tools and a Windows SDK. Run these commands in Developer PowerShell from the project root:
 
 ```powershell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -24,11 +18,11 @@ cmake --build build --config Release
 .\build\bin\rift_runner.exe
 ```
 
-The configure step fetches raylib 6.0 and therefore requires an internet connection the first time. The build copies `assets/` beside the executable.
+The first configure downloads raylib 6.0, so it needs an internet connection. The build copies `assets/` next to the executable.
 
 ## Linux desktop build
 
-Install CMake, a C compiler, pkg-config, and the raylib desktop system dependencies (X11, OpenGL/Mesa, ALSA and related X11 extensions), then run:
+Install CMake, a C compiler, pkg-config, OpenGL/Mesa, ALSA and X11 development libraries. Run:
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -38,7 +32,7 @@ cmake --build build --parallel
 
 ## macOS desktop build
 
-With Xcode command-line tools and CMake installed:
+Install Xcode command-line tools and CMake, then run:
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -46,15 +40,10 @@ cmake --build build --parallel
 ./build/bin/rift_runner
 ```
 
-## Desktop release ZIPs
+## Score storage
 
-Push a version tag that begins with `v`, for example `v0.17.1`, only after the native build and browser deployment are passing. The `Tagged desktop release` workflow is configured to build Windows, Linux, and macOS ZIPs and publish them as a GitHub Release. Do not create a release tag until the current build has been verified.
+The three personal-best scores are stored locally per difficulty. Desktop uses `rift_runner_bests.txt`; the web build uses Emscripten IDBFS at `/persist/rift_runner_bests.txt`, synced to browser storage. Scores are not submitted to a shared server.
 
-## Browser score persistence
+## Verification
 
-The browser pre-run script mounts `/persist` using Emscripten IDBFS, then syncs the filesystem to IndexedDB. The C game writes exactly three personal-best scores to `/persist/rift_runner_bests.txt` in the browser and `rift_runner_bests.txt` on desktop. Records remain local to the browser/device.
-
-
-## CI reproducibility
-
-The project workflows pin Linux jobs to `ubuntu-24.04` instead of relying on the moving `ubuntu-latest` label. CMake keeps C99 as the standard and enables GNU extensions for both targets to help raylib/GLFW compile consistently. A local source syntax check is not a substitute for the GitHub native build against the actual raylib dependency.
+Run `tools/check_assets.py` to validate the five WAV files. A real build still requires raylib and the operating-system dependencies. After pushing a change, confirm both the native and browser GitHub Actions workflows pass and test the deployed game.
