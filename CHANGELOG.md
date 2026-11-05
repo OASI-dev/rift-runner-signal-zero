@@ -1,3 +1,15 @@
+# v0.28.3 — simpler teacher edition
+
+- Reduced `main.c` from 974 to 873 lines while retaining the main game features.
+- Replaced repeated difficulty-name and description functions with lookup arrays and one small color function.
+- Loaded the five sound effects with one short loop rather than five separate statements.
+- Simplified the enemy edge selection with a `switch` statement.
+- Moved very small one-use input, drawing and screen-update helpers next to the code that uses them.
+- Kept the supplied space image as `bg_cradle.png`; the other four backgrounds and their rotation system remain removed.
+- Updated the code walkthrough and presentation guide to match the current source.
+
+---
+
 # Changelog
 
 ## v0.28.2 — simplified: no more 2D arrays or 2D strings

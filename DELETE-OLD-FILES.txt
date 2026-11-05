@@ -8,4 +8,4 @@ audio.c, background.c, bullets.c, colors.c, effects.c, enemies.c, game.c, helper
 Old custom .h files:
 audio.h, background.h, bullets.h, colors.h, effects.h, enemy.h, game.h, pickups.h, player.h
 
-Keep: .git/, main.c, CMakeLists.txt, assets/, web/, tools/, .github/, LICENSE, README.md and other documentation. Add a new folder assets/images/ with the 10 picture files (see START-HERE.txt for the exact names). The sound files are unchanged: shot.wav, impact.wav, pickup.wav, enemy_down.wav and surge.wav.
+Keep: .git/, main.c, CMakeLists.txt, assets/, web/, tools/, .github/, LICENSE, README.md and other documentation. Add a new folder assets/images/ with the 6 picture files (see START-HERE.txt for the exact names). The one background is `bg_cradle.png`; the four unused background images are removed. The sound files are unchanged: shot.wav, impact.wav, pickup.wav, enemy_down.wav and surge.wav.

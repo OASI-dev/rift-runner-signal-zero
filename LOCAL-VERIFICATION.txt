@@ -1,8 +1,10 @@
-RIFT RUNNER: SIGNAL ZERO v0.28.0 — picture edition verification
+LOCAL CHECKS FOR THE SIMPLIFIED TEACHER EDITION
 
-PASS: The package contains exactly one project-owned C file: main.c. No others.c, no custom .h files.
-PASS: main.c compiles with no warnings using the same flags as CMakeLists.txt (-std=gnu99 -Wall -Wextra -Wpedantic -Werror=implicit-function-declaration), against a stand-in for raylib that includes Texture2D/LoadTexture/DrawTexturePro/UnloadTexture (the real raylib was not available here).
-PASS: A scan of the code found no pointer variables and no address-of operators; the only * is FILE *f in save_best and load_best.
-PASS: Headless run of the real game code with pretend key presses and mouse clicks, built with AddressSanitizer and UndefinedBehaviorSanitizer (no errors), WITH NO REAL PICTURE FILES PRESENT (LoadTexture returns an empty texture for each): the 3-mode title screen by keys and by clicking cards; the PLAY button; pause; EASY/MEDIUM/HARD runs with both enemy types and bullets; death, restart lock and restart; best scores saved and loaded; kill score, level and background change; the banana; all 5 backgrounds cycling; confirmed only 3 modes exist (no duel); every screen drawn at 1280x720, 800x480 and 360x640.
+PASS: main.c is 873 lines, compared with 974 lines in the supplied original source.
+PASS: The C source passes a strict GCC C99 syntax-only check with warnings enabled, using a local raylib declaration stub. This checks C syntax and referenced declarations, but it is not a complete link or build against raylib itself.
+PASS: tools/check_assets.py confirms that all five packaged WAV assets are valid PCM RIFF/WAVE files.
+PASS: assets/images/ contains exactly six images: player.png, red_enemy.png, blue_enemy.png, bullet.png, banana.png and bg_cradle.png.
+PASS: The packaged bg_cradle.png is byte-for-byte identical to the space background supplied in this conversation.
+PASS: No source or documentation references remain for the four removed background image files.
 
-NOT VERIFIED HERE: a compile against the real raylib 6.0, the Emscripten/web build, GitHub Pages deployment, sound, how the game actually looks with the real picture files in place, and hands-on gameplay feel. tools/check_assets.py was not run in this environment. GitHub Actions, placing the real images in assets/images/, and an in-browser test remain the proper final checks.
+NOT VERIFIED HERE: A full native build against raylib 6.0, the Emscripten/web build, GitHub Pages deployment, real sound playback and hands-on gameplay with the actual assets. Follow BUILDING.md and test the game on the presentation computer before submitting it.

@@ -1,14 +1,14 @@
-RIFT RUNNER: SIGNAL ZERO — v0.28.0 PICTURE EDITION
+RIFT RUNNER: SIGNAL ZERO — teacher-friendly edition
 
-The WHOLE game is now in ONE file: main.c. There is no others.c anymore -- it was merged in. CMake compiles only main.c.
+The entire game is in main.c. CMake builds this file with the raylib library.
 
-This version uses real pictures instead of drawn shapes for the player, the two enemy types, the bullet, the banana, and the 5 backgrounds. You must create a folder called assets/images/ and put these 10 files in it, using these exact names:
-  player.png, red_enemy.png, blue_enemy.png, bullet.png, banana.png,
-  bg_cradle.png, bg_graveyard.png, bg_rift.png, bg_bloodmoon.png, bg_voidcathedral.png
-If a picture is missing, that one thing is simply invisible -- the game does not crash.
+The images are in assets/images/. Keep these six files:
+  player.png, red_enemy.png, blue_enemy.png, bullet.png, banana.png, bg_cradle.png
 
-The 2 PLAYER DUEL mode has been removed. There are 3 modes now: EASY, MEDIUM, HARD.
+The game uses one permanent background: bg_cradle.png. The four unused background images have been removed.
 
-For an existing GitHub repository: copy these files over the ones in the repo. DELETE others.c -- it is gone, replaced by code now inside main.c. Keep .git/, assets/, web/, tools/ and .github/. Do not delete the five WAV sound files; add the assets/images/ folder with your 10 pictures.
+There are three difficulty modes: EASY, MEDIUM, and HARD. The game includes movement, automatic shooting, enemies, banana health/shield pickup, sound effects, pause, game-over, and saved personal bests.
 
-After updating, review the changes in GitHub Desktop, commit, push to main, check "Native build check" and "Build and publish browser game" under GitHub Actions, and test the published game. A package check is not the same as a confirmed native/browser build or play-test.
+To build, follow BUILDING.md. The first CMake configure downloads raylib 6.0, so an internet connection is required.
+
+Before submitting, build and run the game on the computer you will use for your university presentation.

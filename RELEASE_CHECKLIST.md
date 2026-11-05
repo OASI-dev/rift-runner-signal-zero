@@ -1,4 +1,4 @@
-# Release checklist — RIFT RUNNER: SIGNAL ZERO v0.28.0 picture edition
+# Release checklist — RIFT RUNNER: SIGNAL ZERO teacher-friendly single-background edition
 
 ## Local package checks
 
@@ -10,10 +10,10 @@
 
 ## Required after push
 
-- [ ] Add the 10 picture files to `assets/images/` with the exact names in `README.md`.
+- [ ] Confirm the six picture files are present in `assets/images/` with the exact names in `README.md`.
 - [ ] Native build check succeeds against raylib 6.0.
 - [ ] Emscripten build succeeds, the pictures load in the browser, and GitHub Pages deployment completes.
-- [ ] Test in the live browser game: title screen and the 3 mode cards, movement, firing, collisions, pause, banana, scores saving and loading, the 1,000-point background change -- and that every picture actually shows up correctly sized and facing the right way.
+- [ ] Test in the live browser game: title screen and the 3 mode cards, movement, firing, collisions, pause, banana, scores saving and loading, the permanent Cradle background -- and that every picture actually shows up correctly sized and facing the right way.
 - [ ] Test Windows/Linux/macOS packages before claiming every desktop package is available.
 
 **Verification boundary:** local checks do not prove a real raylib compile, deployment, sound, or how the pictures actually look once in place.

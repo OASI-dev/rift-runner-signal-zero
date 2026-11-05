@@ -1,6 +1,6 @@
 # Building RIFT RUNNER: SIGNAL ZERO — picture edition
 
-The whole game is **one file**: `main.c`. CMake builds it together with the raylib library. The 5 sound effects stay in `assets/`; the 10 pictures (player, 2 enemy types, bullet, banana, 5 backgrounds) go in a new folder, `assets/images/` -- see the exact file names in `README.md`. If a picture file is missing, that one thing just does not appear; the game still runs. The browser page and score-persistence helper remain in `web/`.
+The whole game is **one file**: `main.c`. CMake builds it together with the raylib library. The 5 sound effects stay in `assets/`; the 6 pictures (player, 2 enemy types, bullet, banana, and one background) are in `assets/images/` -- see the exact file names in `README.md`. If a picture file is missing, that one thing just does not appear; the game still runs. The browser page and score-persistence helper remain in `web/`.
 
 ## Browser release
 

@@ -1,7 +1,10 @@
-# Release status — RIFT RUNNER: SIGNAL ZERO v0.28.0 picture edition
+# Simplified teacher edition status
 
-- The whole game is one file, `main.c`; no `others.c` anymore; CMake builds only `main.c` with raylib 6.0.
-- Modes: Easy, Medium, Hard (same difficulty numbers as before). The 2-player duel has been removed.
-- The player, both enemy types, the bullet, the banana and the 5 backgrounds are real pictures loaded from `assets/images/`, drawn with one shared function.
-- Banana still restores up to 20 health and grants an 8-second shield; the five sound effects, personal bests, pause and touch controls are unchanged.
-- Local logic tests passed, including with no real picture files present (the game stays safe, just shows nothing for a missing picture). They do not replace a real native/web build, deployment, or manual gameplay/appearance check. Confirm both GitHub Actions workflows after pushing, and add the picture files.
+- `main.c` is 873 lines (the supplied original was 974 lines).
+- One permanent background remains: `assets/images/bg_cradle.png`, matching the custom space image supplied for this edition.
+- The four other background files and background-rotation logic are removed.
+- Kept the three difficulty modes, player/enemy movement, automatic shooting, collision, particles, banana pickup, sound effects, saved best scores, menus and touch support.
+- Simplified repeated mode text logic, sound loading and enemy edge selection; removed tiny one-use wrappers where the code is clearer inline.
+- Added a plain-English code walkthrough and a presentation script based on the current source.
+
+A full raylib build and hands-on play-test should still be performed on the presentation computer.
