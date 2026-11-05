@@ -677,7 +677,7 @@ int button(float x, float y, float w, float h, const char text[], Color color, i
 void draw_background(void)
 {
     int n = background % 5;                                                  // which of the 5 pictures (0 to 4)
-    draw_sprite(tex_bg[n], 0, 0, WIDTH, HEIGHT, 0, WHITE);                   // the picture, top-left corner at (0,0)
+    draw_sprite(tex_bg[n], WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0, WHITE);  // draw_sprite centers on (x,y), so use the middle of the screen
     if (bg_fade > 0) DrawRectangle(0, 0, WIDTH, HEIGHT, Fade((Color){ 2, 2, 12, 255 }, bg_fade * 0.3f));   // dark veil when the scene changes
 }
 

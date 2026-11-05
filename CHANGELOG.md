@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.28.1 — background fill bug fix
+
+- Fixed `draw_background()`: the background picture was only covering the bottom-right quarter of the window (visible as a half-size image with black space around it) because of a position/center mix-up in the one-line call to `draw_sprite(...)`. It now fills the whole screen.
+
 ## v0.28.0 — picture edition, single file, duel removed
 
 - Merged `others.c` into `main.c`. The whole game is now one file; there is no others.c anymore.
