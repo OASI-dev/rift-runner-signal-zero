@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.28.2 — simplified: no more 2D arrays or 2D strings
+
+- Removed every 2D array from `main.c`: `mode_name[3][10]`, `mode_note[3][24]`, `sector_name[5][16]`, `sound_file[5][30]`, and the background filename list in `load_pictures()`.
+- Replaced them with plain `if`/`else` functions (`get_mode_name`, `get_mode_note`, `get_mode_color`, `get_sector_name`) and, for loading sounds and background pictures, explicit one-line-per-file calls instead of a loop over a filename list. Easier to read top to bottom, nothing indexed by two numbers.
+
 ## v0.28.1 — background fill bug fix
 
 - Fixed `draw_background()`: the background picture was only covering the bottom-right quarter of the window (visible as a half-size image with black space around it) because of a position/center mix-up in the one-line call to `draw_sprite(...)`. It now fills the whole screen.

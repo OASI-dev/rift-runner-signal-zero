@@ -42,6 +42,7 @@
 #include <math.h>       // sinf, cosf, atan2f, sqrtf, fminf, fmaxf
 #include <stdlib.h>     // rand() for random numbers, atoi() to turn text into a number
 #include <time.h>       // time() so the random numbers are different every run
+#include <string.h>     // strcpy() to copy short pieces of text
 #if defined(__EMSCRIPTEN__)
 #include <emscripten.h> // only used when the game is built for the web browser
 #endif
@@ -73,12 +74,6 @@ enum { SND_SHOT, SND_HIT, SND_BANANA, SND_BOOM, SND_LEVEL };        // the 5 sou
 #define C_GRAY   (Color){ 143, 158, 196, 255 }   // soft gray (small text)
 #define C_RED    (Color){ 255, 83, 99, 255 }     // red
 #define C_DARK   (Color){ 38, 47, 74, 255 }      // dark bar background
-
-// One entry for each mode: EASY, MEDIUM, HARD.
-char mode_name[3][10]  = { "EASY", "MEDIUM", "HARD" };                                   // names
-char mode_note[3][24]  = { "Learn the arena", "Stay moving", "Overwhelming pursuit" };    // small descriptions
-Color mode_color[3]    = { { 98, 255, 178, 255 }, { 76, 231, 255, 255 }, { 255, 83, 170, 255 } };   // colors
-char sector_name[5][16] = { "THE CRADLE", "GRAVEYARD BELT", "THE RIFT", "BLOOD MOON", "VOID CATHEDRAL" };   // the 5 backgrounds
 
 // A struct groups the information about ONE thing.
 typedef struct { float x, y, angle, health, shoot_timer, shield, safe; } Player;   // angle = where it looks
@@ -149,6 +144,40 @@ int touching(float x1, float y1, float size1, float x2, float y2, float size2)
     return dx * dx + dy * dy <= together * together;   // compare squares, so no square root is needed
 }
 
+// Copy the name of mode m ("EASY", "MEDIUM" or "HARD") into "out".
+void get_mode_name(int m, char out[])
+{
+    if (m == EASY) strcpy(out, "EASY");
+    else if (m == MEDIUM) strcpy(out, "MEDIUM");
+    else strcpy(out, "HARD");
+}
+
+// Copy the short description of mode m into "out".
+void get_mode_note(int m, char out[])
+{
+    if (m == EASY) strcpy(out, "Learn the arena");
+    else if (m == MEDIUM) strcpy(out, "Stay moving");
+    else strcpy(out, "Overwhelming pursuit");
+}
+
+// The color used for mode m.
+Color get_mode_color(int m)
+{
+    if (m == EASY) return C_GREEN;
+    if (m == MEDIUM) return C_CYAN;
+    return C_PINK;
+}
+
+// Copy the name of background n (0 to 4) into "out".
+void get_sector_name(int n, char out[])
+{
+    if (n == 0) strcpy(out, "THE CRADLE");
+    else if (n == 1) strcpy(out, "GRAVEYARD BELT");
+    else if (n == 2) strcpy(out, "THE RIFT");
+    else if (n == 3) strcpy(out, "BLOOD MOON");
+    else strcpy(out, "VOID CATHEDRAL");
+}
+
 // Draw one picture "tex", centered at (x, y), sized w by h, turned by "angle_deg" degrees.
 // This ONE function draws the player, an enemy, a bullet, the banana AND a full-screen background.
 void draw_sprite(Texture2D tex, float x, float y, float w, float h, float angle_deg, Color tint)
@@ -169,9 +198,11 @@ void load_pictures(void)
     tex_blue   = LoadTexture("assets/images/blue_enemy.png");
     tex_bullet = LoadTexture("assets/images/bullet.png");
     tex_banana = LoadTexture("assets/images/banana.png");
-    char bg_file[5][40] = { "assets/images/bg_cradle.png", "assets/images/bg_graveyard.png",
-        "assets/images/bg_rift.png", "assets/images/bg_bloodmoon.png", "assets/images/bg_voidcathedral.png" };
-    for (int i = 0; i < 5; i++) tex_bg[i] = LoadTexture(bg_file[i]);   // load all 5 backgrounds in a loop
+    tex_bg[0] = LoadTexture("assets/images/bg_cradle.png");
+    tex_bg[1] = LoadTexture("assets/images/bg_graveyard.png");
+    tex_bg[2] = LoadTexture("assets/images/bg_rift.png");
+    tex_bg[3] = LoadTexture("assets/images/bg_bloodmoon.png");
+    tex_bg[4] = LoadTexture("assets/images/bg_voidcathedral.png");
 }
 
 // Free the pictures when the game closes (desktop only; the browser just stops).
@@ -185,8 +216,6 @@ void unload_pictures(void)
     for (int i = 0; i < 5; i++) UnloadTexture(tex_bg[i]);
 }
 
-char sound_file[5][30] = { "assets/shot.wav", "assets/impact.wav", "assets/pickup.wav", "assets/enemy_down.wav", "assets/surge.wav" };   // same order as SND_SHOT ... SND_LEVEL
-
 // Start the sound system (browsers only allow sound after a click).
 void start_audio(void)
 {
@@ -194,7 +223,11 @@ void start_audio(void)
     InitAudioDevice();                                                       // open the sound device
     audio_ready = IsAudioDeviceReady();                                      // did it work?
     if (audio_ready) {                                                       // if yes, load the 5 sound files
-        for (int i = 0; i < 5; i++) sounds[i] = LoadSound(sound_file[i]);
+        sounds[SND_SHOT]   = LoadSound("assets/shot.wav");
+        sounds[SND_HIT]    = LoadSound("assets/impact.wav");
+        sounds[SND_BANANA] = LoadSound("assets/pickup.wav");
+        sounds[SND_BOOM]   = LoadSound("assets/enemy_down.wav");
+        sounds[SND_LEVEL]  = LoadSound("assets/surge.wav");
     }
 }
 
@@ -740,24 +773,29 @@ void draw_hud(void)
     DrawText(TextFormat("%07d", score), 31, 43, 31, C_TEXT);
     DrawText("SURVIVE THE RIFT", 34, 80, 10, C_CYAN);
 
+    char sector[16];                                                         // the name of the current background
+    get_sector_name(background % 5, sector);
     float mx = w / 2 - 144;                                                  // middle box: level and sector
     panel(mx, 16, 288, 90, C_PURPLE);
     draw_center(TextFormat("RIFT LEVEL  %02d", level), 25, 15, C_TEXT);
-    draw_center(TextFormat("SECTOR %02d  //  %s", background + 1, sector_name[background % 5]), 47, 10, C_CYAN);
+    draw_center(TextFormat("SECTOR %02d  //  %s", background + 1, sector), 47, 10, C_CYAN);
     DrawRectangle(mx + 24, 70, 240, 6, C_DARK);                              // progress bar background
     DrawRectangle(mx + 24, 70, 240 * progress, 6, C_CYAN);                   // progress bar
     draw_center(TextFormat("%d%% TO NEXT ENVIRONMENT", (int)(progress * 100)), 82, 9, C_GRAY);
 
+    char name[10];                                                          // the name of the current mode
+    get_mode_name(mode, name);
+    Color mcolor = get_mode_color(mode);                                    // the color of the current mode
     float rx = w - 242;                                                      // right box: mode and health
-    panel(rx, 16, 224, 90, mode_color[mode]);
-    DrawText(mode_name[mode], rx + 18, 27, 12, mode_color[mode]);
+    panel(rx, 16, 224, 90, mcolor);
+    DrawText(name, rx + 18, 27, 12, mcolor);
     DrawText("INTEGRITY", rx + 18, 47, 10, C_GRAY);
     DrawRectangle(rx + 18, 63, 188, 10, C_DARK);                             // health bar background
     DrawRectangle(rx + 18, 63, 188 * ratio, 10, health_color);               // health bar
     draw_right(TextFormat("%d%%", (int)(ratio * 100)), rx + 206, 79, 11, C_TEXT);
 
     if (bg_fade > 0.02f) {                                                   // message: the background changes
-        draw_center(TextFormat("SECTOR SHIFT  //  %s", sector_name[background % 5]), h * 0.2f, 18, Fade(C_CYAN, limit(bg_fade / 0.55f, 0, 1)));
+        draw_center(TextFormat("SECTOR SHIFT  //  %s", sector), h * 0.2f, 18, Fade(C_CYAN, limit(bg_fade / 0.55f, 0, 1)));
     } else if (level_msg > 0) {                                              // message: the level went up
         draw_center("RIFT LEVEL INCREASED  //  PRESSURE RISING", h * 0.2f, 15, Fade(C_GOLD, limit(level_msg * 1.7f, 0, 1)));
     }
@@ -779,8 +817,9 @@ void draw_title(void)
     draw_center("CHOOSE A MODE", card_y - 24, 12, C_CYAN);
     for (int i = 0; i < 3; i++) {                                            // the 3 cards
         float x = start + i * (card_w + gap);
-        if (button(x, card_y, card_w, 100, mode_name[i], mode_color[i], mode == i)) mode = i;   // a click picks the mode
-        if (card_w > 120) DrawText(mode_note[i], x + 10, card_y + 74, 10, C_GRAY);              // small description
+        char name[10]; get_mode_name(i, name);
+        if (button(x, card_y, card_w, 100, name, get_mode_color(i), mode == i)) mode = i;   // a click picks the mode
+        if (card_w > 120) { char note[24]; get_mode_note(i, note); DrawText(note, x + 10, card_y + 74, 10, C_GRAY); }   // small description
     }
     float bw = fminf(300, w - 36);                                           // width of the play button
     if (button(w / 2 - bw / 2, card_y + 120, bw, 52, "PLAY  [ENTER]", C_CYAN, 1)) start_game();   // start the game
@@ -800,7 +839,8 @@ void draw_best(void)
     panel(px, py, pw, 3 * 66 + 20, C_PURPLE);
     for (int i = 0; i < 3; i++) {                                            // one row for each mode
         float ry = py + 14 + i * 66;                                         // y of this row
-        DrawText(mode_name[i], px + 24, ry + 18, 18, mode_color[i]);
+        char name[10]; get_mode_name(i, name);
+        DrawText(name, px + 24, ry + 18, 18, get_mode_color(i));
         if (best[i] > 0) draw_right(TextFormat("%07d", best[i]), px + pw - 24, ry + 14, 26, C_TEXT);   // the record
         else draw_right("N/A", px + pw - 24, ry + 14, 26, C_GRAY);           // no record yet
     }
@@ -830,7 +870,8 @@ void draw_over(void)
     draw_center("RUN TERMINATED", py + 28, 25, C_PINK);
     draw_center("FINAL SCORE", py + 80, 12, C_GRAY);
     draw_center(TextFormat("%07d", score), py + 100, 51, C_TEXT);
-    draw_center(TextFormat("%s    /    RIFT LEVEL %02d", mode_name[mode], level), py + 165, 12, mode_color[mode]);
+    char name[10]; get_mode_name(mode, name);
+    draw_center(TextFormat("%s    /    RIFT LEVEL %02d", name, level), py + 165, 12, get_mode_color(mode));
     if (new_best) draw_center("NEW PERSONAL BEST FOR THIS MODE!", py + 200, 15, C_GOLD);
     else draw_center("MODE BEST: SCORE NOT BEATEN", py + 200, 11, C_GRAY);
     float bw = pw - 48;                                                      // width of the buttons
