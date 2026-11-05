@@ -1,12 +1,8 @@
-RIFT RUNNER: SIGNAL ZERO v0.26.0 — single-file edition verification
+RIFT RUNNER: SIGNAL ZERO v0.28.0 — picture edition verification
 
-PASS: The package contains exactly one project-owned .c file: main.c.
-PASS: No project-owned custom .h files remain.
-PASS: CMake's executable source list contains main.c only.
-PASS: A structural source scan found exactly one main() definition.
-PASS: C braces and preprocessor conditionals are balanced in the merged source.
-PASS: No duplicate static helper function names were detected in the merged source.
-PASS: tools/check_assets.py validated all five PCM WAV assets.
-PASS: Documentation now describes the single-file architecture.
+PASS: The package contains exactly one project-owned C file: main.c. No others.c, no custom .h files.
+PASS: main.c compiles with no warnings using the same flags as CMakeLists.txt (-std=gnu99 -Wall -Wextra -Wpedantic -Werror=implicit-function-declaration), against a stand-in for raylib that includes Texture2D/LoadTexture/DrawTexturePro/UnloadTexture (the real raylib was not available here).
+PASS: A scan of the code found no pointer variables and no address-of operators; the only * is FILE *f in save_best and load_best.
+PASS: Headless run of the real game code with pretend key presses and mouse clicks, built with AddressSanitizer and UndefinedBehaviorSanitizer (no errors), WITH NO REAL PICTURE FILES PRESENT (LoadTexture returns an empty texture for each): the 3-mode title screen by keys and by clicking cards; the PLAY button; pause; EASY/MEDIUM/HARD runs with both enemy types and bullets; death, restart lock and restart; best scores saved and loaded; kill score, level and background change; the banana; all 5 backgrounds cycling; confirmed only 3 modes exist (no duel); every screen drawn at 1280x720, 800x480 and 360x640.
 
-NOT VERIFIED HERE: a native or Emscripten compile against the actual raylib dependency, browser deployment, or hands-on gameplay. Network name resolution was unavailable in this environment, so raylib's source could not be downloaded for a real CMake build. GitHub Actions and an in-browser test remain the proper final checks.
+NOT VERIFIED HERE: a compile against the real raylib 6.0, the Emscripten/web build, GitHub Pages deployment, sound, how the game actually looks with the real picture files in place, and hands-on gameplay feel. tools/check_assets.py was not run in this environment. GitHub Actions, placing the real images in assets/images/, and an in-browser test remain the proper final checks.

@@ -1,106 +1,59 @@
 # RIFT RUNNER: SIGNAL ZERO — explaining the code simply
 
-This edition keeps **all game programming in one `main.c` file**. The `SECTION:` comments are dividers: they show where code used to live in separate source files before the project was combined. They are comments, not extra files required by the compiler.
+The whole game is **one C file**: `main.c`. It uses only: variables, `if / else`, `for` loops, functions, `switch`, arrays and a few structs. There are **no pointer variables** -- the only `*` in the program is `FILE *f` in the two small score-file functions, which is simply how C names an opened file.
+
+## Pictures instead of drawn shapes
+
+Earlier versions drew the player, enemies and backgrounds out of circles and lines. This version loads real picture files instead, with raylib's `LoadTexture(...)`, and draws each one with `DrawTexturePro(...)`, which can also rotate the picture to face the direction something is moving. One small function, `draw_sprite(...)`, does this for the player, both enemy types, the bullet, the banana, AND the full-screen background -- the same function, called with different pictures and sizes, instead of five separate drawing blocks.
 
 ## The whole game in everyday language
 
-Imagine running a small arcade. The game needs to remember what is happening, read what the player does, move everything, decide whether anything hits, draw the scene, play sounds, and save the best score. `main.c` contains each of these jobs.
+Imagine a small arcade machine. It must remember what is happening, read what the player does, move everything, decide what hits what, draw the scene, make sounds and save the best score. Each of those jobs is a function with a plain name.
 
-### 1. Shared types, settings and declarations — near the top
+### The three modes
 
-The first part includes raylib and standard C headers, then defines the data the game needs. A `Player` stores the runner's position, movement, health and shield. An `Enemy` stores an enemy's position, speed, health and type. `Bullet`, `Pickup`, `Particle` and `Star` store the information for their matching game objects. `Game` is the main container holding the current game state, player, object arrays, score, stage, difficulty, sound handles and personal-best values.
+`enum { EASY, MEDIUM, HARD };` gives the numbers 0, 1, 2 readable names. The variable `mode` holds the chosen one. Small tables such as `enemy_speed[3]` hold one value per mode, so `enemy_speed[mode]` means "the enemy speed of this mode".
 
-Function declarations tell the compiler which functions exist before their implementations appear later in the file. Constants such as the screen size and object limits keep repeated values consistent.
+### main.c — part by part
 
-### 2. Math helpers and colors — around lines 227–298
+1. **Libraries and settings.** `#include` lines bring in raylib and the C library. `#define` gives names to fixed numbers. `enum` lines name the screens, the modes, the enemy types and the sounds.
+2. **Data.** A *struct* groups the facts about one thing. `Player` holds x, y, angle, health and timers. `Enemy`, `Bullet` and `Particle` do the same for their things. There is only **one** player now (`Player player;`, not an array), since there is no 2-player mode anymore. A field called `on` says whether a bullet/enemy/spark slot is in use (1) or free (0). The 10 `Texture2D` variables hold the loaded pictures.
+3. **Small helpers.** `random_float(low, high)` picks a random decimal number. `limit(value, low, high)` keeps a number inside a range. `touching(...)` tells whether two circles touch. `draw_sprite(...)` draws one picture, centered, sized and rotated -- used for everything visual in the game.
+4. **Loading pictures, sound and saved scores.** `load_pictures()` loads the 10 picture files from `assets/images/` once, when the game starts (the window must already be open). `start_audio()` / `play(n)` handle sound. `save_best()` / `load_best()` read and write the score file, one number per line.
+5. **Sparks.** `explosion(...)` creates small colored circles flying outward (used for hits, deaths and the banana) -- these stay as simple drawn circles, not pictures.
+6. **Mouse and touch input.** Reads where the player clicked or touched, for the buttons and for phone movement/aiming.
+7. **Player and bullet rules.** `shoot()` creates a bullet. `move_player(dt)` reads the keys (and phone fingers, and the mouse) and moves the player: *position = position + speed × time*. `update_bullets(dt)` moves bullets and removes old ones.
+8. **Game rules: enemies, banana, a run.** `spawn_enemy()` makes a red (big, tough, slow) or blue (small, weak, fast) enemy at a random edge. `update_enemies(dt)` steers each enemy: Easy wanders randomly, Medium chases the player, Hard chases with a random wobble. `enemy_hits()` checks bullets against enemies and `kill_enemy(i)` gives 200 points and a new level every 500 points. `update_banana(dt)` gives +20 health and an 8-second shield. `update_run(dt)` runs all of this, in order, once per frame; every 1000 score the `background` number goes up, so a new picture is shown.
+9. **Screens (keyboard part).** `start_game()` resets everything and starts the chosen mode. `update_title()`, `update_pause()`, `update_over()` and `update_best()` read the keys of each screen.
+10. **Small drawing helpers.** `draw_center`, `draw_right`, `panel` and `button(...)` -- `button` draws itself and returns 1 when clicked, used by every screen with buttons.
+11. **Drawing the player, enemies, background and the arena.** `draw_background()` is now just one call to `draw_sprite(...)` with the current sector's picture, stretched to fill the screen. `draw_player()` and `draw_enemy(i)` draw the picture turned to face the right way, with a gold tint when shielded or just hit. `draw_world()` draws the banana, bullets, enemies, sparks and the player, in that order.
+12. **Drawing the screens and one whole frame.** The HUD, title screen (now 3 mode cards), best-scores screen, pause screen and game-over screen. `draw_frame()` draws one whole frame: background, arena, the screen on top, and the white flash.
+13. **Main loop.** `game_frame()` runs about 60 times a second: it measures the time since the last frame (`dt`), updates the active screen with a `switch`, then draws. `main()` opens the window, loads the pictures and the best scores, and starts the loop.
 
-These are small reusable tools. They clamp a value into a range, choose a random value, measure distances, add or scale 2D vectors, normalize a direction, adjust transparency, and draw text centered or right-aligned. Instead of repeating the same formula in many places, the game calls a helper. `RRNormalizeVector2` safely turns a direction into a unit-length direction and uses a unique name to avoid colliding with a raylib symbol.
+## Good questions your teacher may ask
 
-### 3. Background environments — around lines 299–517
-
-This section draws the star field and procedural space scenery. It uses raylib's drawing functions to create planets, rings, asteroids, rift shapes, glowing details and transitions. A score milestone changes the selected environment; the background is visual scenery and does not itself decide enemy behavior.
-
-### 4. Player movement, aiming and appearance — around lines 518–653
-
-`UpdatePlayer` reads keyboard and touch/mouse state through raylib, works out movement, keeps the runner inside the play area, updates facing direction and firing timing, and manages timers such as temporary protection. `DrawRunner` draws the player's ship/runner. Raylib reports input and draws shapes; the movement rules and the ship's design are game code written in C.
-
-### 5. Enemies — around lines 654–930
-
-`SpawnEnemy` chooses where a new enemy appears and sets its type and starting values. `UpdateEnemies` moves enemies and checks contact with the player. Easy uses random roaming, Medium follows the player, and Hard combines pursuit with randomized turning and extra spawn chances. `KillEnemy` handles defeat rewards and effects. The drawing functions make red Wraiths and blue Skitters look different. The damage values, movement behavior and health rules are project decisions, not rules supplied by raylib.
-
-### 6. Bullets — around lines 931–977
-
-`AddBullet` creates a shot at a position with a direction and velocity. `UpdateBullets` advances shots over time, checks whether a shot hits an enemy, applies the game's hit rules and removes expired or used bullets. Raylib provides timing and basic shape drawing; the projectile movement and collision rules are written for this game.
-
-### 7. Banana pickup — around lines 978–1019
-
-The banana is the only pickup in v0.26.0. Its update code animates the pickup and checks collection. When the runner collects it, health goes up by as much as 20 without exceeding maximum health, and the runner gets an 8-second shield. It doesn't add a health kit, repair cell or data-chip system.
-
-### 8. Visual effects — around lines 1020–1064
-
-Particles are tiny colored shapes that appear briefly when things happen, such as hits or transitions. The effect functions create them, move them, reduce their remaining lifetime and stop drawing them when their lifetime expires. These effects are feedback for the player rather than separate game rules.
-
-### 9. World drawing — around lines 1065–1142
-
-This section draws active objects in a deliberate order: the world/background, pickups, bullets, enemies, runner and other visible objects. Drawing order matters because objects drawn later can appear in front of objects drawn earlier. The renderer presents the current state; it should not normally be the place where game rules are updated.
-
-### 10. Audio — around lines 1143–1187
-
-The audio code initializes sound support, plays one of five one-shot effects, and releases audio resources when the game closes. The five files are `shot.wav`, `impact.wav`, `pickup.wav`, `enemy_down.wav` and `surge.wav`. There is no background music or ambient loop. Browser audio may wait for the first user gesture because browsers restrict sound before the player interacts.
-
-### 11. Personal bests — around lines 1188–1234
-
-The leaderboard loads and saves exactly three local records: Easy, Medium and Hard. The game updates a difficulty's record only when a new run beats that mode's best. Desktop uses a local text file; the browser build uses Emscripten's persistent filesystem bridge. These scores are local to that device/browser, not a public online leaderboard.
-
-### 12. Start, reset and end a run — around lines 1235–1318
-
-`ResetWorld` clears old bullets, enemies, pickups and effects and puts the game objects into a fresh state. `StartRun` starts a new attempt using the selected difficulty. `EndRun` finishes a run and checks the personal best. `SetDifficulty` changes the selected settings. `InitGame` sets up the initial game state and loads saved records.
-
-### 13. Menus, HUD and touch controls — around lines 1319–1875
-
-This long UI section reads menu input and draws the title screen, difficulty cards, score screen, heads-up display (HUD), pause screen and game-over screen. The HUD presents information such as health, shield time, score and stage. Touch-control code lets a browser player steer and aim without a keyboard. raylib is used to measure and draw text, draw panels and read input; the button layout, labels and menu rules are authored in the game.
-
-### 14. Main game process — around lines 1876–2007
-
-`UpdatePlaying` is the step-by-step update for a live round: handle pause, update the player, update bullets, update enemies, process pickups and effects, change backgrounds at score thresholds, spawn bananas and spawn enemies. The order is important: for example, shots are updated before enemies are advanced, so hit checks and state changes happen in a controlled order.
-
-`GameFrame` is called once per rendered frame. It gets the frame time, limits unusually large time steps, polls shared mouse/touch input, updates whichever screen is active and then calls `DrawFrame`.
-
-`main` is the C program's entry point. It configures and opens the raylib window, sets the frame rate, initializes the game, then starts the desktop loop or hands control to the browser's Emscripten loop. On desktop it also shuts down audio and closes the window at the end.
-
-## How the other project files still work
-
-Only **game source code** is combined into `main.c`; the project still needs supporting assets and build/deployment files:
-
-| File or folder | What it does | Is it another source-code module? |
-|---|---|---|
-| `assets/` | Contains the five WAV sounds that the game loads. | No; sound data. |
-| `web/index.html` | Provides the browser landing page around the web game. | No; web page. |
-| `web/idbfs-pre.js` | Helps the browser build mount/sync persistent score storage. | No; browser support script. |
-| `CMakeLists.txt` | Tells CMake to compile **only `main.c`** and link raylib. | No; build configuration. |
-| `.github/workflows/` | Describes automated native builds, web builds and deployment. | No; CI configuration. |
-| `tools/` | Contains asset validation and release/build helper scripts. | No; developer tools. |
-| `README.md`, `BUILDING.md`, `LICENSE` | Explain the project, builds and license. | No; documentation/legal text. |
+- **Why no `player[2]` array anymore?** Because there is only one player now that the duel mode is gone -- a plain `Player player;` is simpler than an array of one.
+- **Why `dt`?** It is the time of the last frame. Moving by `speed * dt` makes the game run at the same speed on slow and fast computers.
+- **Why does `draw_sprite` take width AND height separately, not just one "size"?** So the same function can draw a square player sprite AND a wide rectangular background with the same code.
+- **What happens if a picture file is missing?** `LoadTexture` quietly returns an empty picture (0 width, 0 height); the game keeps running, that one object is just invisible. Nothing crashes.
 
 ## raylib in a short, teacher-friendly summary
 
-**raylib is a C library that gives the game ready-made building blocks for multimedia.** In this project it creates the window, reads keyboard/mouse/touch-related input, reports frame time, draws shapes and text, and plays the WAV sound effects. It saves us from having to write all the operating-system window, graphics and audio code ourselves.
+**raylib is a C library that gives the game ready-made building blocks for multimedia.** In this project it creates the window, reads keyboard/mouse/touch input, reports frame time, loads and draws pictures, draws shapes and text, and plays the WAV sound effects. It saves us from writing the operating-system window, graphics and audio code ourselves.
 
-**raylib does not design the game rules.** The movement rules, enemy AI, shooting, collision checks, health, shield, scoring, difficulty, menus and backgrounds are implemented in our own `main.c` code using raylib's functions.
+**raylib does not design the game rules.** Movement, enemy behavior, shooting, collisions, health, shield, scoring, difficulty, menus and backgrounds are written in our own `main.c` using raylib's functions.
 
-A simple way to explain it to a teacher:
+A simple way to say it to a teacher:
 
-> “C is the programming language, raylib is the multimedia library, and `main.c` contains my game logic. raylib opens the game window, reads controls, draws the visuals and plays sounds. My code decides how the runner moves, how enemies behave, how shots collide, how score increases and when the game changes screens.”
+> "C is the programming language, raylib is the multimedia library, and `main.c` contains my game logic. raylib opens the game window, reads controls, loads and draws the pictures and plays sounds. My code decides how the runner moves, how enemies behave, how shots collide, how score increases and when the game changes screens."
 
 ## A few core raylib jobs used here
 
 - `InitWindow(...)` opens the game window or canvas.
-- `SetTargetFPS(...)` requests a target frame rate.
+- `LoadTexture(...)` loads a picture file into memory; `DrawTexturePro(...)` draws it, rotated and tinted; `UnloadTexture(...)` frees it when the game closes.
 - `GetFrameTime()` gives the duration of the last frame, so movement can be time-based.
-- `IsKeyDown(...)`, `IsKeyPressed(...)`, mouse/touch functions read player input.
+- `IsKeyDown(...)`, `IsKeyPressed(...)` and the mouse/touch functions read player input.
 - `BeginDrawing()` and `EndDrawing()` bracket a frame's drawing work.
-- `DrawText(...)`, `DrawCircle(...)`, `DrawLine(...)` and rectangle functions draw the HUD, menus, ships and effects.
-- Audio functions such as `LoadSound(...)`, `PlaySound(...)` and `UnloadSound(...)` load, play and release effects.
-- `WindowShouldClose()` allows the desktop loop to detect a close request.
-
-The exact functions called at any moment depend on the selected game screen and platform. CMake fetches raylib and links it to the one-file game during a build.
+- `DrawText(...)`, `DrawCircle(...)` and the rectangle functions draw the HUD, menus and sparks.
+- `LoadSound(...)`, `PlaySound(...)` and `UnloadSound(...)` load, play and release the effects.
+- `WindowShouldClose()` lets the desktop loop detect a close request.

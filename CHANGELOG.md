@@ -1,3 +1,23 @@
+# Changelog
+
+## v0.28.0 — picture edition, single file, duel removed
+
+- Merged `others.c` into `main.c`. The whole game is now one file; there is no others.c anymore.
+- The player, the two enemy types, the bullet, the banana and the 5 backgrounds are now real picture files, loaded from `assets/images/`, instead of drawn shapes. One small function, `draw_sprite(...)`, draws all of them (rotated and tinted where needed).
+- Removed the 2-player duel mode. There are 3 modes now: Easy, Medium, Hard. The player is a single `Player player;` struct, not a 2-player array.
+- Removed code that is no longer needed now that art is real pictures: the procedural background scenes, the twinkling star field, and the `glow()`, `triangle()` and `line()` drawing helpers.
+- Easy, Medium and Hard keep the same speed, spawn, damage and health numbers as before. The banana (+20 health, 8-second shield), the 5 backgrounds changing every 1000 score, personal bests, pause, and touch controls are all unchanged.
+- There are still no pointer variables anywhere in the file except `FILE *f` in the two score-file functions.
+
+## v0.27.0 — simple rewrite and 2-player duel
+
+- Rewrote `main.c` and `others.c` from scratch in a simpler style: snake_case names (`red_enemy` / `blue_enemy` types, `shoot`, `spawn_enemy`, `move_player`), only if/else, loops, arrays, functions, switch and a few structs. There are no pointer variables; the only `*` is `FILE *f` in the two score-file functions.
+- Added **2 PLAYER** mode (same keyboard): Player 1 = WASD + Space, Player 2 = arrow keys + Enter, 100 health, 20 damage per hit, first to 5 points wins.
+- The title screen now has four mode cards (Easy, Medium, Hard, 2 Player) and a PLAY button; keys 1-4, left/right and the mouse all choose a mode.
+- Easy, Medium and Hard keep the same speed, spawn, damage and health numbers as v0.26.0. The banana (+20 health, 8-second shield), the five backgrounds (new one every 1000 score) and the five sound effects are unchanged.
+- Simplified: enemies steer by easing their velocity toward a target direction, so they may feel a little different from v0.26.0 (the numbers are in tables at the top of `main.c`). Enemies are drawn as glowing circles with eyes, and the aim reticle, leg animation, rare third spawn on Hard and the personal-best link on the pause screen were removed.
+- Personal bests now use the file `rift_runner_scores.txt` (desktop) or `/persist/rift_runner_scores.txt` (web). Records saved by older versions are not carried over.
+
 ## v0.26.0 — single-file edition (combined source)
 
 - Combined every gameplay module into one labelled `main.c`, including shared structures and declarations formerly stored in custom headers.
@@ -11,8 +31,6 @@
 - Hard: 0.58-second base spawn interval, 120 base enemy speed, 34 base red-enemy contact damage, 85 starting health, a higher on-screen enemy cap (48), extra spawns from stage 3, and a rare third spawn from stage 7.
 - Increased simultaneous enemy allowance by difficulty; stage scaling still increases pressure over time.
 - Preserved +20 health / 8-second banana shield, original five sound effects, no music, and the raylib `RRNormalizeVector2` name-collision fix.
-
-# Changelog
 
 ## v0.25.2 — fix native Normalize linker collision
 

@@ -1,0 +1,14 @@
+/build/
+/build-*/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.app/
+rift_runner_scores.txt
+rift_runner_scores.tmp
+rift_runner_bests.txt
+.DS_Store

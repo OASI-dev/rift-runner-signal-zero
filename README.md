@@ -1,6 +1,6 @@
-# RIFT RUNNER: SIGNAL ZERO — single-file edition
+# RIFT RUNNER: SIGNAL ZERO — picture edition
 
-**A score-first neon survival shooter written in C and raylib.** In this edition, all game code has been combined into **one `main.c` file** so you can read the whole game in one place. There are no separate game-module `.c` or custom `.h` source files.
+**A score-first neon survival shooter written in C and raylib.** The whole game is **one readable C file**: `main.c`. The player, the two enemy types, the bullet, the banana and the 5 backgrounds are real pictures, loaded from a folder called `assets/images/` (see **Pictures needed**, below).
 
 ## Play in your browser
 
@@ -8,59 +8,64 @@ After the `Build and publish browser game` workflow passes and GitHub Pages fini
 
 **https://oasi-dev.github.io/rift-runner-signal-zero/**
 
-The workflow publishes the WebAssembly build from this repository. If the latest workflow run is red or deployment has not completed, the link may not yet contain this edition.
+If the latest workflow run is red or deployment has not completed, the link may not yet contain this edition.
+
+## Modes
+
+- **Easy / Medium / Hard** — you against red Wraiths and blue Skitters. Easy enemies roam randomly, Medium enemies chase you, Hard enemies chase with a random wobble and extra spawns.
+
+## Pictures needed
+
+Create a folder `assets/images/` next to `main.c` and put these 10 files in it, using these exact names:
+
+| File | What it's for |
+|---|---|
+| `player.png` | the player |
+| `red_enemy.png` | the red "Wraith" enemy |
+| `blue_enemy.png` | the blue "Skitter" enemy |
+| `bullet.png` | the bullet |
+| `banana.png` | the banana pickup |
+| `bg_cradle.png` | background 1: The Cradle |
+| `bg_graveyard.png` | background 2: Graveyard Belt |
+| `bg_rift.png` | background 3: The Rift |
+| `bg_bloodmoon.png` | background 4: Blood Moon |
+| `bg_voidcathedral.png` | background 5: Void Cathedral |
+
+If a file is missing, that one thing is simply invisible — the game still runs.
 
 ## Gameplay at a glance
 
-- **Movement:** WASD or arrow keys. Touch users can drag on the left side of the browser canvas to move.
-- **Aiming and firing:** hold the left mouse button to aim/fire toward the cursor; touch users aim on the right side.
-- **Difficulty:** Easy, Medium, or Hard. Easy enemies roam randomly; Medium enemies pursue; Hard enemies combine pursuit and randomized steering with extra pressure spawns.
-- **Enemies:** red Wraiths and blue Skitters, with different size, durability and contact damage.
-- **Banana pickup:** restores up to 20 health and grants an 8-second shield. Health never exceeds maximum.
-- **Progression:** score raises stage pressure. The space environment changes every 1,000 points.
-- **Personal bests:** one local best score for each of Easy, Medium and Hard. Records stay on the same device/browser.
-- **Audio:** exactly five original one-shot WAV effects—shot, impact, pickup, enemy defeated and stage surge. No music or ambience.
+- **Enemies:** red Wraiths are big and tough, blue Skitters are small and fast. Every kill is 200 points.
+- **Levels:** a new level every 500 points makes enemies faster and more numerous.
+- **Banana pickup:** restores up to 20 health and gives an 8-second shield.
+- **Backgrounds:** five space scenes; a new one every 1,000 points.
+- **Personal bests:** one local best per difficulty (Easy, Medium, Hard), kept on the same device/browser.
+- **Audio:** five one-shot WAV effects. No music or ambience.
 
 ## Controls
 
-| Action | Keyboard / mouse |
+| Action | Keys |
 |---|---|
-| Move | WASD or arrow keys |
-| Aim / fire | Hold left mouse button toward the cursor |
-| Pause / resume | P or Escape |
-| Select difficulty | 1 / 2 / 3 or left/right arrows on the title screen |
-| Personal-best screen | B |
-| Start / choose | Enter or Space; use mouse/touch on menu buttons |
+| Choose a mode | 1 / 2 / 3, left/right arrows, A / D, or click a card |
+| Start | Enter, Space or the PLAY button |
+| Move (single-player) | WASD or arrow keys; touch: drag on the left side |
+| Aim (single-player) | Hold the mouse button; touch: right side. The gun fires by itself |
+| Pause (single-player) | P or Escape |
+| Personal bests | B on the title screen |
 
-## Single-file code map
+## Code map
 
-Open `main.c`. The file is arranged in labelled sections to make a long file easier to navigate:
+`main.c` (one file): settings and colors; structs and variables, including the 10 picture variables; helper functions, including `draw_sprite` which draws every picture; loading pictures/sound/scores; sparks; input; player and bullet rules; enemy/banana/run rules; screen keys; drawing helpers and buttons; drawing the pictures and the arena; drawing the screens; the main loop.
 
-- **Shared declarations:** game structs, difficulty settings, and function declarations that previously lived in headers.
-- **Math and color helpers:** reusable vector, distance, clamp, opacity and drawing helpers.
-- **Backgrounds:** procedural space scenes and transitions.
-- **Player:** movement, aiming, firing cadence, shield and runner drawing.
-- **Enemies:** spawn rules, difficulty AI, contact damage, hit points, rewards and enemy drawing.
-- **Bullets / pickups / effects:** projectiles, banana behavior, particles and screen feedback.
-- **World rendering:** draws the action and objects in layers.
-- **Audio / leaderboard:** five sound effects and local per-difficulty records.
-- **Game lifecycle:** initialize, reset, start and end runs; choose difficulty.
-- **UI:** title menu, HUD, pause, game over, leaderboard, touch controls.
-- **Main process:** `UpdatePlaying`, `GameFrame`, and `main`—the program entry point.
+See [CODE-WALKTHROUGH.md](CODE-WALKTHROUGH.md) for a plain-English tour.
 
-Search for `SECTION:` in `main.c` to jump between the original modules now embedded in the same file.
+## Build
 
-## Build a desktop version
-
-CMake downloads raylib 6.0 on the first configure, so an internet connection is needed the first time. Follow [BUILDING.md](BUILDING.md). The code itself is one `main.c`; CMake and raylib are still used to build the application.
-
-## Build and publish the browser version
-
-Push the repository to GitHub and check **Actions → Build and publish browser game**. The workflow uses Emscripten and deploys the resulting game to GitHub Pages. In repository **Settings → Pages**, select **GitHub Actions** as the source.
+CMake downloads raylib 6.0 on the first configure, so an internet connection is needed once. Follow [BUILDING.md](BUILDING.md). CMake compiles the one file, `main.c`.
 
 ## Verification boundary
 
-Source packaging and audio checks can be run locally; a successful ZIP check does not prove a full compile or gameplay test. Confirm the native and browser GitHub Actions workflows pass, then test the live game.
+The game logic was compiled and run headlessly against a stand-in for raylib. A real native/web build, the web deployment and hands-on play-testing still have to be confirmed on GitHub Actions and in the browser.
 
 ## License
 

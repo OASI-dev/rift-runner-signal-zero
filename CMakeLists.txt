@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(rift_runner_signal_zero VERSION 0.26.0 LANGUAGES C)
+project(rift_runner_signal_zero VERSION 0.28.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -30,6 +30,7 @@ if(EMSCRIPTEN)
     target_compile_options(raylib PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu99>)
 endif()
 
+# The whole game is in main.c now -- no others.c anymore.
 add_executable(rift_runner
     main.c
 )

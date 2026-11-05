@@ -6,7 +6,11 @@ The browser target must compile raylib and `main.c` in GNU C99 mode. `CMakeLists
 
 ## The compiler says `DrawCircleGradient` has too many arguments
 
-raylib 6.0 uses `DrawCircleGradient(Vector2 center, float radius, Color inner, Color outer)`. Pass the center as a `Vector2`; do not use the older x/y-style argument list.
+raylib 6.0 uses `DrawCircleGradient(Vector2 center, float radius, Color inner, Color outer)`. Pass the center as a `Vector2`; do not use the older x/y-style argument list. (The v0.27.0 code does not call this function.)
+
+## Part of the game is invisible (player, an enemy, the banana, or a background is missing)
+
+That object's picture file is missing or misnamed. Check it is in `assets/images/` with the exact name listed in `README.md` (all lowercase, `.png`). `LoadTexture` fails silently -- the game keeps running with that one thing invisible, it does not crash or print an error on screen.
 
 ## The site loads but the game area is blank
 
@@ -16,9 +20,13 @@ Open the newest **Build and publish browser game** run. Both **Compile web game*
 
 Browsers can restrict audio before a user gesture. Click inside the game or press a key to start the game/audio experience, then verify the browser isn't muted.
 
+## Pictures don't show up in the browser build
+
+Make sure `assets/images/` is inside the `assets/` folder that `CMakeLists.txt` preloads with `--preload-file`. If `assets/images/` were a sibling of `assets/` instead of inside it, the web build would not package the pictures at all.
+
 ## Scores disappear or fail to persist
 
-The browser uses Emscripten IDBFS at `/persist`. Check that `web/idbfs-pre.js` is passed as `--pre-js`, the IDBFS filesystem is mounted before the runtime starts, and the browser allows site storage. The three per-mode personal bests are local to each browser profile/device and are stored in `/persist/rift_runner_bests.txt`.
+The browser uses Emscripten IDBFS at `/persist`. Check that `web/idbfs-pre.js` is passed as `--pre-js`, the IDBFS filesystem is mounted before the runtime starts, and the browser allows site storage. The three per-mode personal bests are local to each browser profile/device and are stored in `/persist/rift_runner_scores.txt`. Older versions used `rift_runner_bests.txt`; those records are not read by v0.27.0.
 
 ## Desktop build fails to open a window
 

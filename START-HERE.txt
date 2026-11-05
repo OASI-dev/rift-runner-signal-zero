@@ -1,9 +1,14 @@
-RIFT RUNNER: SIGNAL ZERO — v0.26.0 SINGLE-FILE EDITION
+RIFT RUNNER: SIGNAL ZERO — v0.28.0 PICTURE EDITION
 
-The game code is combined into ONE C source file: main.c. The other .c and custom .h module files have been removed from this edition. The game still uses raylib, CMake, the assets/ directory, browser support files in web/, and GitHub Actions workflows.
+The WHOLE game is now in ONE file: main.c. There is no others.c anymore -- it was merged in. CMake compiles only main.c.
 
-For a fresh installation, extract the single-file source ZIP into a new folder. For an existing GitHub repository, copy the package files into the repo, replace matching files, and DELETE the old gameplay module .c and .h files listed in DELETE-OLD-FILES.txt. Keep .git/, assets/, web/, tools/, and .github/. Do not delete the five current WAV files.
+This version uses real pictures instead of drawn shapes for the player, the two enemy types, the bullet, the banana, and the 5 backgrounds. You must create a folder called assets/images/ and put these 10 files in it, using these exact names:
+  player.png, red_enemy.png, blue_enemy.png, bullet.png, banana.png,
+  bg_cradle.png, bg_graveyard.png, bg_rift.png, bg_bloodmoon.png, bg_voidcathedral.png
+If a picture is missing, that one thing is simply invisible -- the game does not crash.
 
-The game keeps the v0.26.0 difficulty rebalance, banana pickup (+up to 20 health and an 8-second shield), five original one-shot sound effects, no music or ambience, and RRNormalizeVector2 naming fix.
+The 2 PLAYER DUEL mode has been removed. There are 3 modes now: EASY, MEDIUM, HARD.
 
-After updating, review the file deletions/additions in GitHub Desktop, commit, push to main, check Native build check and Build and publish browser game under GitHub Actions, and test the published game. A package check is not the same as a confirmed native/browser build or play-test.
+For an existing GitHub repository: copy these files over the ones in the repo. DELETE others.c -- it is gone, replaced by code now inside main.c. Keep .git/, assets/, web/, tools/ and .github/. Do not delete the five WAV sound files; add the assets/images/ folder with your 10 pictures.
+
+After updating, review the changes in GitHub Desktop, commit, push to main, check "Native build check" and "Build and publish browser game" under GitHub Actions, and test the published game. A package check is not the same as a confirmed native/browser build or play-test.
